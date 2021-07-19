@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -45,7 +46,7 @@ func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
 	return func(fn string, fi os.FileInfo, err error) error {
 		if re.MatchString(fn) == false {
-			return nil
+			return errors.New("specs could not be found in given path")
 		}
 		if fi.IsDir() {
 			dirFiles, err := ioutil.ReadDir(fi.Name())
