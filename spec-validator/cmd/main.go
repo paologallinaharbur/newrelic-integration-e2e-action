@@ -1,13 +1,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -56,9 +56,9 @@ func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo
 			for _, f := range dirFiles {
 				files = append(files, f.Name())
 			}
-		} else {
-			files = append(files, fn)
+			return nil
 		}
+		files = append(files, fn)
 		return nil
 	}
 }
