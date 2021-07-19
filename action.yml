@@ -24,5 +24,7 @@ runs:
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
-    - run: echo "${{ inputs.secrets }}"
+    - run: echo "${{ fromJson(inputs.secrets).SECRET_DEMO }}"
+      shell: bash
+    - run: echo "$SECRET_DEMO"
       shell: bash
