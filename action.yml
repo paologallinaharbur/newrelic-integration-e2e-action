@@ -15,15 +15,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ls ${{ github.action_path }}
-      shell: bash
-    - run: pwd ${{ github.action_path }}
-      shell: bash
-    - id: build-spec-validator
-      run: docker build -t newrelic-integration-e2e-action:spec-validator  ${{ github.action_path }}/spec-validator
-      shell: bash
-    - id: run-spec-validator
-      run: docker run newrelic-integration-e2e-action:spec-validator
+    - id: spec-validator
+      run: make -C ${{ github.action_path }}
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
