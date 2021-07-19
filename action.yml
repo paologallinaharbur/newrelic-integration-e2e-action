@@ -14,11 +14,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: echo "${inputs.spec}"
+    - run: echo "${{ inputs.spec }}"
       shell: bash
-    - run: echo "${inputs.integration_pkg}"
+    - run: echo "${{ inputs.integration_pkg }}"
       shell: bash
-    - run: echo "${inputs.license_key}"
+    - run: echo "${{ inputs.license_key }}"
       shell: bash
-    - run: echo "${secrets.secret_demo}"
+    - run: echo "${{ secrets.secret_demo }}"
       shell: bash
