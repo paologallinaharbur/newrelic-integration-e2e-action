@@ -33,14 +33,12 @@ func main() {
 		log.Error(err)
 		os.Exit(1)
 	}
-	log.Infof("validating specs in path %s", specFiles)
+	log.Infof("found %[1]d spec files.\n", len(specFiles))
 }
 
 func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
-	files := []string{}
-	filepath.Walk(rootDir, listFiles(re, files))
-	log.Infof("found %[1]d spec files.\n", len(files))
-	return files, nil
+	files := make([]string,0)
+	return files, filepath.Walk(rootDir, listFiles(re, files))
 }
 
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
