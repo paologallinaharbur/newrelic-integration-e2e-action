@@ -11,20 +11,17 @@ inputs:
   license_key:
     description: New Relic license key used to test the integration
     required: true
-  secrets_context:
-    description: Secrets in JSON format
-    required: false
 
 runs:
   using: "composite"
   steps:
-    - run: echo "${{ inputs.spec }}"
+    - id: validate-spec
+      uses: actions/setup-go@v2
+      run: go run cmd/validate/main.go
       shell: bash
     - run: echo "${{ inputs.integration_pkg }}"
       shell: bash
     - run: echo "${{ inputs.license_key }}"
-      shell: bash
-    - run: echo "${{ fromJson(inputs.secrets).SECRET_DEMO }}"
       shell: bash
     - run: echo "$SECRET_DEMO"
       shell: bash
