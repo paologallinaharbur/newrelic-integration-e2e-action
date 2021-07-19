@@ -1,7 +1,7 @@
 name: newrelic-integration-e2e-action
 description: Run e2e tests for the newrelic integrations.
 inputs:
-  spec:
+  specs:
     description: Path to the specification files for the tests. Regular expressions are supported.
     required: false
     default: "e2e/spec-*.yml"
@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - id: spec-validator
-      run: make -C ${{ github.action_path }}/spec-validator
+      run: make -C ${{ github.action_path }}/spec-validator SPECS=${{ github.workspace }}/${{ inputs.specs }}
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash

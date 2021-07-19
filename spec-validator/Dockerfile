@@ -5,10 +5,6 @@ FROM golang:alpine AS builder
 RUN apk update && apk add --no-cache git
 WORKDIR $GOPATH/src
 COPY . .
-# Fetch dependencies.
-# Using go get.
-RUN ls
-RUN pwd
 # Build the binary.
 RUN go build -o /go/bin/spec-validator cmd/main.go
 ############################
