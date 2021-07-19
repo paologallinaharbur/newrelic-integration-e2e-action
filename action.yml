@@ -15,12 +15,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: ls .*
+    - run: ls ${{ github.action_path }}
       shell: bash
-    - run: pwd
+    - run: pwd ${{ github.action_path }}
       shell: bash
     - id: build-spec-validator
-      run: docker build -t newrelic-integration-e2e-action:spec-validator  spec-validator
+      run: docker build -t newrelic-integration-e2e-action:spec-validator  ${{ github.action_path }}/spec-validator
       shell: bash
     - id: run-spec-validator
       run: docker run newrelic-integration-e2e-action:spec-validator
