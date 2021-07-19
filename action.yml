@@ -14,7 +14,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: echo "${inputs.specs}"
+    - run: echo "${inputs.spec}"
       shell: bash
     - run: echo "${inputs.integration_pkg}"
       shell: bash
