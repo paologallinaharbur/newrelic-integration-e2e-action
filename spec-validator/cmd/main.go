@@ -1,16 +1,19 @@
 package main
 
 import (
-	"github.com/newrelic/infrastructure-agent/pkg/log"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/os"
+	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
-const(
-	specsPathEnvVar="SPECS"
+const (
+	specsPathEnvVar = "SPECS"
 )
 
-func main(){
+var log = logrus.New()
+
+func main() {
 	log.Info("running spec-validator")
-	paths:=os.Getenv(specsPathEnvVar)
-	log.Info("validating specs in path %s",paths)
+	paths := os.Getenv(specsPathEnvVar)
+	log.Infof("validating specs in path %s", paths)
 }
