@@ -11,6 +11,10 @@ inputs:
   license_key:
     description: New Relic license key used to test the integration
     required: true
+  secrets_context:
+    description: Secrets in JSON format
+    required: false
+
 runs:
   using: "composite"
   steps:
@@ -20,5 +24,5 @@ runs:
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
-    - run: echo "${{ SECRETS_CONTEXT.SECRET_DEMO }}"
+    - run: echo "${{ fromJson(inputs.secrets_context).SECRET_DEMO }}"
       shell: bash
