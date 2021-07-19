@@ -15,10 +15,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - id: validate-specs
-      run: go run go run e2e-spec-validator/cmd/main.go
+    - id: build-spec-validator
+      run: docker build -t newrelic-integration-e2e-action:spec-validator  spec-validator
       shell: bash
-    - run: echo "${{ inputs.integration_pkg }}"
+    - id: run-spec-validator
+      run: docker run newrelic-integration-e2e-action:spec-validator
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
