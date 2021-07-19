@@ -1,0 +1,20 @@
+name: newrelic-integration-e2e-action
+description: Run e2e tests for the newrelic integrations.
+inputs:
+  spec:
+    description: Path to the specification files for the tests. Regular expressions are supported.
+    required: false
+    default: "e2e/spec-*.yml"
+  integration_pkg:
+    description: Relative path to the pkg to be tested
+    required: true
+  license_key:
+    description: New Relic license key used to test the integration
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: echo "${inputs.specs}"
+    - run: echo "${inputs.integration_pkg}"
+    - run: echo "${inputs.license_key}"
+    - run: echo "${secrets.secret_demo}"
