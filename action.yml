@@ -16,7 +16,6 @@ runs:
   using: "composite"
   steps:
     - id: validate-spec
-      uses: actions/setup-go@v2
       run: go run cmd/validate/main.go
       shell: bash
     - run: echo "${{ inputs.integration_pkg }}"
