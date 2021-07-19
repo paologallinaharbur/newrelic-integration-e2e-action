@@ -34,6 +34,10 @@ func main() {
 		os.Exit(1)
 	}
 	log.Infof("found %[1]d spec files.\n", len(specFiles))
+	if len(specFiles)==0{
+		errors.New("specs could not be found in given path")
+		os.Exit(1)
+	}
 }
 
 func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
@@ -44,7 +48,7 @@ func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
 	return func(fn string, fi os.FileInfo, err error) error {
 		if re.MatchString(fn) == false {
-			return errors.New("specs could not be found in given path")
+			return nil
 		}
 		if fi.IsDir() {
 			dirFiles, err := ioutil.ReadDir(fi.Name())
