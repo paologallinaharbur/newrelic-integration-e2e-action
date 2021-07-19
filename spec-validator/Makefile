@@ -6,4 +6,4 @@ all: compile run
 compile:
 	docker build -t $(DOCKER_IMG) .
 run:
-	docker run $(DOCKER_IMG) -e SPECS=$(SPECS)
+	docker run $(DOCKER_IMG) --env SPECS=$(SPECS)
