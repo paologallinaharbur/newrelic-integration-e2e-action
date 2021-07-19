@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - id: spec-validator
-      run: make -C ${{ github.action_path }}/spec-validator SPECS=${{ github.workspace }}/${{ inputs.specs }}
+      run: make -C ${{ github.action_path }}/spec-validator ROOT_DIR=${{ github.workspace }} SPECS_PATH=${{ inputs.specs }}
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
