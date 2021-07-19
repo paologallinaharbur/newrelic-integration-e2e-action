@@ -15,8 +15,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - id: validate-spec
-      run: go run cmd/validate/main.go
+    - id: validate-specs
+      run: go run go run e2e-spec-validator/cmd/main.go
       shell: bash
     - run: echo "${{ inputs.integration_pkg }}"
       shell: bash
