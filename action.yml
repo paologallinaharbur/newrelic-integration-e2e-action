@@ -20,5 +20,5 @@ runs:
       shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
-    - run: echo "${{ secrets.secret_demo }}"
+    - run: echo "${{ secrets.SECRET_DEMO }}"
       shell: bash
