@@ -1,71 +1,33 @@
 package main
 
 import (
-	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"regexp"
 
 	"github.com/sirupsen/logrus"
+	"github.com/newrelic/newrelic-integration-e2e-action/spec-validator/pkg"
 )
 
 var log = logrus.New()
 
 const (
-	flagRootDir   = "root_dir"
-	flagSpecsPath = "specs_path"
+	flagSpecPath = "spec_path"
 )
 
 func main() {
 	log.Info("running spec-validator")
-	rootDirPtr := flag.String(flagRootDir, "", "Root  to the spec files")
-	specsPathPtr := flag.String(flagSpecsPath, "", "Relative path to the spec files")
+	specsPathPtr := flag.String(flagSpecPath, "", "Relative path to the spec file")
 	flag.Parse()
-	specsPath := *specsPathPtr
-	rootDirPath := *rootDirPtr
-	if specsPath == "" {
+	specPath := *specsPathPtr
+	if specPath == "" {
 		os.Exit(1)
 	}
-	log.Infof("searching spec file in %s", rootDirPath)
-	specFiles, err := findSpecFiles(rootDirPath, regexp.MustCompile(specsPath))
-	if err != nil {
+	content,err:=ioutil.ReadFile(specPath)
+	if err!=nil{
 		log.Error(err)
 		os.Exit(1)
 	}
-	log.Infof("found %[1]d spec files.\n", len(specFiles))
-	if len(specFiles) == 0 {
-		errors.New("specs could not be found in given path")
-		os.Exit(1)
-	}
+	pkg.ParseSpecFile(content)
 }
 
-func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
-	files := make([]string, 0)
-	return files, filepath.Walk(rootDir, listFiles(re, files))
-}
-
-func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
-	return func(fn string, fi os.FileInfo, err error) error {
-		fmt.Println("-----")
-		fmt.Println(fn)
-		if re.MatchString(fn) == false {
-			fmt.Println("Not matched")
-			return nil
-		}
-		if fi.IsDir() {
-			dirFiles, err := ioutil.ReadDir(fi.Name())
-			if err != nil {
-				log.Fatal(err)
-			}
-			for _, f := range dirFiles {
-				files = append(files, f.Name())
-			}
-			return nil
-		}
-		files = append(files, fn)
-		return nil
-	}
-}
