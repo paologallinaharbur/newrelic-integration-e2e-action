@@ -29,20 +29,21 @@ func main() {
 	if specsPath == "" {
 		os.Exit(1)
 	}
+	log.Infof("searching spec file in %s", rootDirPath)
 	specFiles, err := findSpecFiles(rootDirPath, regexp.MustCompile(specsPath))
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
 	log.Infof("found %[1]d spec files.\n", len(specFiles))
-	if len(specFiles)==0{
+	if len(specFiles) == 0 {
 		errors.New("specs could not be found in given path")
 		os.Exit(1)
 	}
 }
 
 func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
-	files := make([]string,0)
+	files := make([]string, 0)
 	return files, filepath.Walk(rootDir, listFiles(re, files))
 }
 
