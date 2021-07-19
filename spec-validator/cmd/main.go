@@ -9,6 +9,7 @@ import (
 	"regexp"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
 )
 
 var log = logrus.New()
@@ -48,7 +49,9 @@ func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
 
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
 	return func(fn string, fi os.FileInfo, err error) error {
+		fmt.Println(fn)
 		if re.MatchString(fn) == false {
+			fmt.Println("Not matched")
 			return nil
 		}
 		if fi.IsDir() {
