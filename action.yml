@@ -15,6 +15,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - run: ls
+      shell: bash
+    - run: pwd
+      shell: bash
     - id: build-spec-validator
       run: docker build -t newrelic-integration-e2e-action:spec-validator  spec-validator
       shell: bash
