@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 
 	"github.com/sirupsen/logrus"
-	"fmt"
 )
 
 var log = logrus.New()
@@ -49,6 +49,7 @@ func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
 
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
 	return func(fn string, fi os.FileInfo, err error) error {
+		fmt.Println("-----")
 		fmt.Println(fn)
 		if re.MatchString(fn) == false {
 			fmt.Println("Not matched")
