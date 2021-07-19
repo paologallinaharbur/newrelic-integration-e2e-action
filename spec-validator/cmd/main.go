@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -47,6 +48,9 @@ func findSpecFiles(rootDir string, re *regexp.Regexp) ([]string, error) {
 
 func listFiles(re *regexp.Regexp, files []string) func(fn string, fi os.FileInfo, err error) error {
 	return func(fn string, fi os.FileInfo, err error) error {
+		fmt.Println(fn)
+		fmt.Println(fi.Name())
+		fmt.Println(fi.IsDir())
 		if re.MatchString(fn) == false {
 			return nil
 		}
