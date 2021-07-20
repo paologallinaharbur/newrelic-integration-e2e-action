@@ -26,7 +26,7 @@ docker-build:
 
 docker-run-%:
 	@printf "=== $(NAME) === [ run / $* ]: running the binary "
-	docker run --entrypoint $* -v $(ROOT_DIR):/opt/code $(NAME) --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+	docker run --entrypoint /$* -v $(ROOT_DIR):/opt/code $(NAME) --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 
 test:
