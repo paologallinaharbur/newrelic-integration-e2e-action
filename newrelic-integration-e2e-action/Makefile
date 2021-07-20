@@ -1,5 +1,4 @@
-NAME=newrelic-integration-e2e-action/spec-validator
-DOCKER_IMG=newrelic-integration-e2e-action:spec-validator
+NAME=newrelic-integration-e2e-action
 
 GOLANGCI_LINT = github.com/golangci/golangci-lint/cmd/golangci-lint
 GOFLAGS          = -mod=readonly
@@ -21,13 +20,13 @@ validate:
 	@[ -f .semgrep.yml ] && semgrep_config=".semgrep.yml" || semgrep_config="p/golang" ; \
 	docker run --rm -v "${PWD}:/src:ro" --workdir / returntocorp/semgrep -c "$$semgrep_config"
 
-docker-build:
-	@printf "=== $(NAME) === [ build ]: running docker build... "
-	docker build -t $(DOCKER_IMG) .
+docker-build-%:
+	@printf "=== $(NAME) === [ build / ${*} ]: running docker build... "
+	docker build --build-arg module=$* -t $(NAME):$* .
 
-docker-run: docker-build
-	@printf "=== $(NAME) === [ run ]: running the application "
-	docker run -v $(ROOT_DIR):/opt/code $(DOCKER_IMG) --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+docker-run-%: docker-build-$*
+	@printf "=== $(NAME) === [ run / ${*} ]: running the binary "
+	docker run -v $(ROOT_DIR):/opt/code $(NAME):$* --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 
 test:

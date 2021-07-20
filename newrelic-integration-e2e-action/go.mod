@@ -1,4 +1,4 @@
-module github.com/newrelic/newrelic-integration-e2e-action/spec-validator
+module github.com/newrelic/newrelic-integration-e2e-action
 
 go 1.16
 
