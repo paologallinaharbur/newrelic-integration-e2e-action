@@ -17,9 +17,6 @@ runs:
     - id: list-files
       run: ls
       shell: bash
-    - id: spec-validator
-      run: make -C ${{ github.action_path }}/spec-validator SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }}
-      shell: bash
     - run: echo "${{ inputs.license_key }}"
       shell: bash
     - run: echo "$SECRET_DEMO"
