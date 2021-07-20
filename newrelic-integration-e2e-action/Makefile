@@ -20,13 +20,13 @@ validate:
 	@[ -f .semgrep.yml ] && semgrep_config=".semgrep.yml" || semgrep_config="p/golang" ; \
 	docker run --rm -v "${PWD}:/src:ro" --workdir / returntocorp/semgrep -c "$$semgrep_config"
 
-docker-build-%:
+docker-build:
 	@printf "=== $(NAME) === [ build / ${*} ]: running docker build... "
-	docker build --build-arg module=$* -t $(NAME):$* .
+	@docker build -t $(NAME) .
 
-docker-run-%: docker-build-$*
-	@printf "=== $(NAME) === [ run / ${*} ]: running the binary "
-	docker run -v $(ROOT_DIR):/opt/code $(NAME):$* --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+docker-run-%:
+	@printf "=== $(NAME) === [ run / $* ]: running the binary "
+	docker run --entrypoint $* -v $(ROOT_DIR):/opt/code $(NAME) --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 
 test:
