@@ -2,6 +2,7 @@ package settings
 
 import (
 	"io/ioutil"
+	"log"
 
 	"github.com/newrelic/newrelic-integration-e2e-action/pkg/spec"
 	"github.com/sirupsen/logrus"
@@ -33,11 +34,13 @@ func WithLogLevel(logLevel logrus.Level) Option {
 type Settings interface {
 	Logger() *logrus.Logger
 	SpecDefinition() *spec.SpecDefinition
+	RootDir() string
 }
 
 type settings struct {
-	logger *logrus.Logger
-	spec   *spec.SpecDefinition
+	logger  *logrus.Logger
+	spec    *spec.SpecDefinition
+	rootDir string
 }
 
 func (s *settings) Logger() *logrus.Logger {
@@ -46,6 +49,10 @@ func (s *settings) Logger() *logrus.Logger {
 
 func (s *settings) SpecDefinition() *spec.SpecDefinition {
 	return s.spec
+}
+
+func (s *settings) RootDir() string {
+	return s.rootDir
 }
 
 // New returns a Scheduler
@@ -66,8 +73,13 @@ func New(
 	if err != nil {
 		return nil, err
 	}
+	rootDir, err := ioutil.TempDir("", "e2e")
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &settings{
-		logger: logger,
-		spec:   spec,
+		logger:  logger,
+		spec:    spec,
+		rootDir: rootDir,
 	}, nil
 }
