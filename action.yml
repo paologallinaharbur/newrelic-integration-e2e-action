@@ -24,6 +24,9 @@ runs:
     - id: validate-spec
       run: make -C ${{ github.action_path }}/newrelic-integration-e2e-action ROOT_DIR=${{ github.action_path }} SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run-validator
       shell: bash
+    - id: run-spec
+      run: make -C ${{ github.action_path }}/newrelic-integration-e2e-action ROOT_DIR=${{ github.action_path }} SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run-executor
+      shell: bash
 
 
 
