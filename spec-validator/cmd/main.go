@@ -2,10 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"github.com/newrelic/newrelic-integration-e2e-action/spec-validator/pkg"
