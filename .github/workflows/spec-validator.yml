@@ -1,4 +1,4 @@
-name: newrelic-integration-e2e-action/spec-validator
+name: newrelic-integration-e2e-action
 
 # Pipeline: nri-config-generator
 # The purpose of this pipeline is guarantee that the code in the config-generator is correct
@@ -12,7 +12,7 @@ name: newrelic-integration-e2e-action/spec-validator
 
 on:
   push:
-    paths: [ spec-validator/** ]
+    paths: [ newrelic-integration-e2e-action/** ]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -28,7 +28,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          working-directory: spec-validator
+          working-directory: newrelic-integration-e2e-action
   snyk:
     if: ${{ false }}
     name: Run security checks via snyk
