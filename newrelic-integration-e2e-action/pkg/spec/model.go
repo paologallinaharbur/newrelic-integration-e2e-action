@@ -36,6 +36,7 @@ func (s *Scenario) validate() error {
 
 type Integration struct {
 	Name   string                 `yaml:"name"`
+	Path   string                 `yaml:"path"`
 	Config map[string]interface{} `yaml:"config"`
 }
 

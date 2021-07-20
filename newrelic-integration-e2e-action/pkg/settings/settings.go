@@ -2,7 +2,6 @@ package settings
 
 import (
 	"io/ioutil"
-	"log"
 
 	"github.com/newrelic/newrelic-integration-e2e-action/pkg/spec"
 	"github.com/sirupsen/logrus"
@@ -73,10 +72,12 @@ func New(
 	if err != nil {
 		return nil, err
 	}
+	logger.Debug("create temporal directory for the agent")
 	rootDir, err := ioutil.TempDir("", "e2e")
 	if err != nil {
-		log.Fatal(err)
+		return nil,err
 	}
+	logger.Debug("return with settings")
 	return &settings{
 		logger:  logger,
 		spec:    spec,
