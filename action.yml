@@ -3,8 +3,7 @@ description: Run e2e tests for the newrelic integrations.
 inputs:
   spec_path:
     description: Path to the test specification file.
-    required: false
-    default: "e2e/spec.yml"
+    required: true
   integration_pkg:
     description: Relative path to the pkg to be tested
     required: true
@@ -15,6 +14,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - id: list-files
+      run: ls
+      shell: bash
     - id: spec-validator
       run: make -C ${{ github.action_path }}/spec-validator SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }}
       shell: bash
