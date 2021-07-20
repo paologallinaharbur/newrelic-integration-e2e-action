@@ -18,10 +18,11 @@ func main() {
 		settings.WithSpecPath(cfg.SpecPath()),
 		settings.WithLogLevel(cfg.LogLevel()),
 	)
-	logger := settings.Logger()
 	if err != nil {
-		logger.Fatal(err)
+		logrus.Fatal(err)
 	}
+	logger := settings.Logger()
+
 	if err := settings.SpecDefinition().Validate(); err != nil {
 		logger.Fatal(err)
 	}
