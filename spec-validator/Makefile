@@ -29,6 +29,7 @@ docker-run: docker-build
 	@printf "=== $(NAME) === [ run ]: running the application "
 	docker run -v $(ROOT_DIR):/opt/code $(DOCKER_IMG) --spec_path=/opt/code/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
+
 test:
 	@echo "=== $(NAME) === [ test ]: running unit tests..."
 	@go test -race ./... -count=1
