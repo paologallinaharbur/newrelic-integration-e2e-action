@@ -30,7 +30,7 @@ docker-run-%:
 
 run-%:
 	@printf "=== $(NAME) === [ run / $* ]: running the binary "
-	go run $(NAME)/$*/main.go --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+	go run $(ROOT_DIR)/$(NAME)/$*/main.go --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 
 test:
