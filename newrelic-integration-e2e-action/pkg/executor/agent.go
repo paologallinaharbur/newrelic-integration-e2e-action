@@ -1,10 +1,8 @@
 package executor
 
 import (
-	"io/fs"
 	"os"
 	"path/filepath"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -22,10 +20,10 @@ func (a *agent) initialize(logger *logrus.Logger) error {
 	if err := removeDirectoryContent(a.rootDir); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Join(a.rootDir, integrationsCfgDir), fs.ModePerm); err != nil {
+	if err := os.Mkdir(filepath.Join(a.rootDir, integrationsCfgDir), 0777); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Join(a.rootDir, integrationsBinDir), fs.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(a.rootDir, integrationsBinDir), 0777); err != nil {
 		return err
 	}
 	return nil
