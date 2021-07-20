@@ -21,7 +21,7 @@ validate:
 	docker run --rm -v "${PWD}:/src:ro" --workdir / returntocorp/semgrep -c "$$semgrep_config"
 
 docker-build:
-	@printf "=== $(NAME) === [ build / ${*} ]: running docker build... "
+	@printf "=== $(NAME) === [ build ]: running docker build... "
 	@docker build -t $(NAME) .
 
 docker-run-%:

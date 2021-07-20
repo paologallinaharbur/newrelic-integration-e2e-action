@@ -18,8 +18,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - id: setup
+      run: make -C ${{ github.action_path }}/newrelic-integration-e2e-action docker-build
+      shell: bash
     - id: spec-validator
-      run: make -C ${{ github.action_path }}/newrelic-integration-e2e-action ROOT_DIR=${{ github.workspace }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} validator
+      run: make -C ${{ github.action_path }}/newrelic-integration-e2e-action ROOT_DIR=${{ github.workspace }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} docker-run-validator
       shell: bash
 
 
