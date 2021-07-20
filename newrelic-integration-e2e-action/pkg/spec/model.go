@@ -7,7 +7,7 @@ import (
 type SpecDefinition struct {
 	Description string     `yaml:"description"`
 	BeforeAll   string     `yaml:"before_all"`
-	AfterAll    string     `yaml:"before_all"`
+	AfterAll    string     `yaml:"after_all"`
 	Scenarios   []Scenario `yaml:"scenarios"`
 }
 
