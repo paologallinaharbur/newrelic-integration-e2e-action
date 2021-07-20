@@ -1,9 +1,10 @@
 DOCKER_IMG=newrelic-integration-e2e-action:spec-validator
 SPEC_PATH=?
+ROOT_DIR=?
 
 all: compile run
 
 compile:
 	docker build -t $(DOCKER_IMG) .
 run:
-	docker run $(DOCKER_IMG) --spec_path=$(SPEC_PATH)
+	docker run -v $(ROOT_DIR):/opt/code $(DOCKER_IMG) --spec_path=/opt/code/$(SPEC_PATH)
