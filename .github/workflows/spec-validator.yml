@@ -57,4 +57,4 @@ jobs:
           username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
           password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
       - name: Unit tests
-        run: make ci/test
+        run: make -C spec-validator test
