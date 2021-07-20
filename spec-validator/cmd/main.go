@@ -34,6 +34,9 @@ func main() {
 		os.Exit(1)
 	}
 	log.Debug("parsing the content of the spec file")
-	pkg.ParseSpecFile(content)
+	if _,err:=pkg.ParseSpecFile(content);err!=nil{
+		log.Error(err)
+		os.Exit(1)
+	}
 }
 
