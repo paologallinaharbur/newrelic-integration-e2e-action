@@ -1,4 +1,4 @@
-name: newrelic-integration-e2e-action
+name: newrelic-integration-e2e
 
 # Pipeline: nri-config-generator
 # The purpose of this pipeline is guarantee that the code in the config-generator is correct
@@ -28,7 +28,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          working-directory: newrelic-integration-e2e-action
+          working-directory: newrelic-integration-e2e
   snyk:
     if: ${{ false }}
     name: Run security checks via snyk
