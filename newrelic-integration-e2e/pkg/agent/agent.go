@@ -10,7 +10,7 @@ import (
 	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
