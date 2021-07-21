@@ -1,10 +1,13 @@
-package executor
+package agent
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 func removeDirectoryContent(dir string) error {
@@ -49,4 +52,23 @@ func copyFile(src, dst string) (int64, error) {
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
+}
+
+func makeDirs(perm os.FileMode, dirs ...string) error {
+	for i := range dirs {
+		dir := dirs[i]
+		if err := os.Mkdir(dir, perm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func processTemplate(t *template.Template, vars map[string]interface{}, outputPath string) error {
+	var templateOut bytes.Buffer
+	if err := t.Execute(&templateOut, vars); err != nil {
+		return err
+	}
+	content := templateOut.String()
+	return ioutil.WriteFile(outputPath, []byte(content), 0777)
 }

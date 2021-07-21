@@ -1,4 +1,4 @@
-module github.com/newrelic/newrelic-integration-e2e-action
+module github.com/newrelic/newrelic-integration-e2e
 
 go 1.16
 

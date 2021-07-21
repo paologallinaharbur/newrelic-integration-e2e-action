@@ -4,16 +4,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type SpecDefinition struct {
+type Definition struct {
 	Description string     `yaml:"description"`
 	BeforeAll   string     `yaml:"before_all"`
 	AfterAll    string     `yaml:"after_all"`
 	Scenarios   []Scenario `yaml:"scenarios"`
 }
 
-func (s *SpecDefinition) Validate() error {
-	for i := range s.Scenarios {
-		if err := s.Scenarios[i].validate(); err != nil {
+func (def *Definition) Validate() error {
+	for i := range def.Scenarios {
+		if err := def.Scenarios[i].validate(); err != nil {
 			return err
 		}
 	}
@@ -40,12 +40,39 @@ type Integration struct {
 	Config map[string]interface{} `yaml:"config"`
 }
 
+type Integrations []Integration
+
+func (i Integrations) MarshalYAML() (interface{}, error) {
+	type integration struct {
+		Name   string                 `yaml:"name"`
+		Config map[string]interface{} `yaml:"config"`
+	}
+	type outputIntegrations struct {
+		Integrations []integration `yaml:"integrations"`
+	}
+	out := outputIntegrations{
+		Integrations:make([]integration, len(i)),
+	}
+	for index:=range i{
+		out.Integrations[index] = integration{
+			Name:   i[index].Name,
+			Config: i[index].Config,
+		}
+	}
+	content, err := yaml.Marshal(out)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(content), nil
+}
+
 func (i *Integration) validate() error {
 	return nil
 }
 
-func ParseSpecFile(content []byte) (*SpecDefinition, error) {
-	specDefinition := &SpecDefinition{}
+func ParseSpecFile(content []byte) (*Definition, error) {
+	specDefinition := &Definition{}
 	if err := yaml.Unmarshal(content, specDefinition); err != nil {
 		return nil, err
 	}
