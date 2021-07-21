@@ -40,33 +40,6 @@ type Integration struct {
 	Config map[string]interface{} `yaml:"config"`
 }
 
-type Integrations []Integration
-
-func (i Integrations) MarshalYAML() (interface{}, error) {
-	type integration struct {
-		Name   string                 `yaml:"name"`
-		Config map[string]interface{} `yaml:"config"`
-	}
-	type outputIntegrations struct {
-		Integrations []integration `yaml:"integrations"`
-	}
-	out := outputIntegrations{
-		Integrations:make([]integration, len(i)),
-	}
-	for index:=range i{
-		out.Integrations[index] = integration{
-			Name:   i[index].Name,
-			Config: i[index].Config,
-		}
-	}
-	content, err := yaml.Marshal(out)
-	if err != nil {
-		return nil, err
-	}
-
-	return string(content), nil
-}
-
 func (i *Integration) validate() error {
 	return nil
 }

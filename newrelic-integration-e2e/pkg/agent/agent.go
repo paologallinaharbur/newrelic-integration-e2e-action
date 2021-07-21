@@ -73,8 +73,8 @@ func (a *agent) addIntegration(integration spec.Integration) error {
 	return nil
 }
 
-func (a *agent) addIntegrationsConfigFile(integrations spec.Integrations) error {
-	content, err := yaml.Marshal(integrations)
+func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
+	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
 	if err != nil {
 		return err
 	}
