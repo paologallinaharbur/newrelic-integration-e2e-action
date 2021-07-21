@@ -29,6 +29,7 @@ run:
 	echo "$(TMPDIR)" >> $(GH_ACTION_DIR)/.agent_dir
 	go run $(GH_ACTION_DIR)/$(NAME)/main.go --agent_dir=$(TMPDIR) --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
+
 logs:
 	docker-compose -f "$(shell cat ${AGENT_INITIALIZED_FILE})/docker-compose.yml" logs -f
 
