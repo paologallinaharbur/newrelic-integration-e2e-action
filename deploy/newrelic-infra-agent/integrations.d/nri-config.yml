@@ -1,0 +1,11 @@
+integrations:
+    - name: nri-powerdns
+      config:
+        api_key: authoritative-secret
+        exporter_port: 9121
+        powerdns_url: http://localhost:8081/api/v1/
+    - name: nri-powerdns
+      config:
+        api_key: recursor-secret
+        exporter_port: 9122
+        powerdns_url: http://localhost:8082/api/v1/

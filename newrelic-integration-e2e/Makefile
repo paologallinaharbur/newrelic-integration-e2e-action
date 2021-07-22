@@ -23,18 +23,10 @@ validate:
 	@[ -f .semgrep.yml ] && semgrep_config=".semgrep.yml" || semgrep_config="p/golang" ; \
 	docker run --rm -v "${PWD}:/src:ro" --workdir / returntocorp/semgrep -c "$$semgrep_config"
 
-TMPDIR := $(shell mktemp -d)
+
 run:
 	@printf "=== $(NAME) === [ run / $* ]: running the binary "
-	echo "$(TMPDIR)" >> $(GH_ACTION_DIR)/.agent_dir
-	go run $(GH_ACTION_DIR)/$(NAME)/main.go --agent_dir=$(TMPDIR) --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
-
-logs:
-	docker-compose -f "$(shell cat ${AGENT_INITIALIZED_FILE})/docker-compose.yml" logs -f
-
-stop:
-	docker-compose -f "$(shell cat ${AGENT_INITIALIZED_FILE})/docker-compose.yml" down -v
-	rm $(AGENT_INITIALIZED_FILE)
+	go run $(GH_ACTION_DIR)/$(NAME)/main.go --agent_dir=$(GH_ACTION_DIR)/deploy --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 test:
 	@echo "=== $(NAME) === [ test ]: running unit tests..."

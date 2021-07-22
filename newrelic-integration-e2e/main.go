@@ -58,7 +58,7 @@ func main() {
 	if err := settings.Spec().Validate(); err != nil {
 		logger.Fatalf("error validating the spec definition: %s", err)
 	}
-	ag := agent.NewAgent(settings, dockerComposeTemplate)
+	ag := agent.NewAgent(settings)
 	if err := executor.Exec(ag, settings); err != nil {
 		logger.Fatal(err)
 	}

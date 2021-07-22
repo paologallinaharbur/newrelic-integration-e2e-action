@@ -10,12 +10,21 @@ import (
 	"text/template"
 )
 
+func removeDirectories(dirs ...string) error {
+	for i:= range dirs{
+		dir:=dirs[i]
+		if err := os.RemoveAll(dir); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func removeDirectoryContent(dir string) error {
 	d, err := os.Open(dir)
 	if err != nil {
-		return err
+		return nil
 	}
-	defer func(){
+	defer func() {
 		_ = d.Close()
 	}()
 	names, err := d.Readdirnames(-1)
@@ -31,19 +40,19 @@ func removeDirectoryContent(dir string) error {
 	return nil
 }
 
-func copyFile(src, dst string) (int64, error) {
+func copyFile(src, dst string) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
+		return fmt.Errorf("%s is not a regular file", src)
 	}
 
 	source, err := os.Open(src)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer func() {
 		_ = source.Close()
@@ -51,19 +60,29 @@ func copyFile(src, dst string) (int64, error) {
 
 	destination, err := os.Create(dst)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	defer func(){
+	defer func() {
 		_ = destination.Close()
 	}()
-	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
+	_, err = io.Copy(destination, source)
+	return err
 }
 
 func makeDirs(perm os.FileMode, dirs ...string) error {
 	for i := range dirs {
 		dir := dirs[i]
 		if err := os.Mkdir(dir, perm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func removeDirs(dirs ...string) error {
+	for i := range dirs {
+		dir := dirs[i]
+		if err := removeDirectoryContent(dir); err != nil {
 			return err
 		}
 	}

@@ -5,10 +5,9 @@ import (
 )
 
 type Definition struct {
-	Description string     `yaml:"description"`
-	BeforeAll   string     `yaml:"before_all"`
-	AfterAll    string     `yaml:"after_all"`
-	Scenarios   []Scenario `yaml:"scenarios"`
+	Description    string     `yaml:"description"`
+	Scenarios      []Scenario `yaml:"scenarios"`
+	AgentOverrides *Agent     `yaml:"agent"`
 }
 
 func (def *Definition) Validate() error {
@@ -20,9 +19,15 @@ func (def *Definition) Validate() error {
 	return nil
 }
 
+type Agent struct {
+	Integrations map[string]string `yaml:"integrations"`
+}
+
 type Scenario struct {
 	Description  string        `yaml:"description"`
 	Integrations []Integration `yaml:"integrations"`
+	Before       []string      `yaml:"before"`
+	After       []string      `yaml:"after"`
 }
 
 func (s *Scenario) validate() error {
@@ -35,9 +40,10 @@ func (s *Scenario) validate() error {
 }
 
 type Integration struct {
-	Name   string                 `yaml:"name"`
-	Path   string                 `yaml:"path"`
-	Config map[string]interface{} `yaml:"config"`
+	Name               string                 `yaml:"name"`
+	BinaryPath         string                 `yaml:"binary_path"`
+	ExporterBinaryPath string                 `yaml:"exporter_binary_path"`
+	Config             map[string]interface{} `yaml:"config"`
 }
 
 func (i *Integration) validate() error {

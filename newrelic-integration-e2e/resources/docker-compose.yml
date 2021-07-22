@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  agent:
+
+    container_name: newrelic-infra
+    image: newrelic/infrastructure:latest
+    cap_add:
+      - SYS_PTRACE
+    network_mode: host
+    pid: host
+    privileged: true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/:/host:ro"
+      - "./integrations.d:/etc/newrelic-infra/integrations.d"
+      {{range .integrations}}- "./bin/{{.}}:/var/db/newrelic-infra/newrelic-integrations/bin/{{.}}"{{end}}
+    restart: unless-stopped
+    environment:
+      NRIA_VERBOSE: 1
+      NRIA_STAGING: "true"
+      NRIA_LICENSE_KEY: {{.licenseKey}}
