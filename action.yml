@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - id: run-spec
-      run: make -C ${{ github.action_path }}/newrelic-integration-e2e ROOT_DIR=${{ github.action_path }} LICENSE_KEY=${{ inputs.license_key }} ROOT_DIR=${{ github.workspace }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
+      run: make -C ROOT_DIR=${{ github.action_path }} LICENSE_KEY=${{ inputs.license_key }} ROOT_DIR=${{ github.workspace }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
       shell: bash
 
 
