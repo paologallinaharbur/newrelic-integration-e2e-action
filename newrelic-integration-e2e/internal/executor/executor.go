@@ -1,4 +1,4 @@
-package spec
+package executor
 
 import (
 	"os/exec"

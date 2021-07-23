@@ -4,9 +4,9 @@ import (
 	_ "embed"
 	"flag"
 
+	"github.com/newrelic/newrelic-integration-e2e/internal/executor"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/agent"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
-	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -62,7 +62,7 @@ func main() {
 		logger.Fatalf("error validating the spec definition: %s", err)
 	}
 	ag := agent.NewAgent(s)
-	if err := spec.Exec(ag, s); err != nil {
+	if err := executor.Exec(ag, s); err != nil {
 		logger.Fatal(err)
 	}
 	logger.Info("execution completed successfully!")
