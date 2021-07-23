@@ -18,11 +18,6 @@ runs:
     - id: run-spec
       run: make -C ${{ github.action_path }}/newrelic-integration-e2e ROOT_DIR=${{ github.action_path }} LICENSE_KEY=${{ inputs.license_key }} SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
       shell: bash
-    - id: launch-infra-agent
-      run: docker-compose run -d
-    - id: stop-agent
-      run: make -C ${{ github.action_path }}/newrelic-integration-e2e stop
-      shell: bash
 
 
 
