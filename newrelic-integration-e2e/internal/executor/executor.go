@@ -9,36 +9,31 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Exec(ag agent.Agent, settings settings.Settings) error{
+func Exec(ag agent.Agent, settings settings.Settings) error {
 	spec := settings.Spec()
 	for i := range spec.Scenarios {
 		scenario := spec.Scenarios[i]
 		settings.Logger().Debugf("[scenario]: %s", scenario.Description)
-		if err:=ag.SetUp(scenario);err!=nil{
+		if err := ag.SetUp(settings.Logger(), scenario); err != nil {
 			return err
 		}
-		if err := executeOSCommands(settings,scenario.Before); err != nil {
+		if err := executeOSCommands(settings, scenario.Before); err != nil {
 			return err
 		}
-		if err:=ag.Launch();err!=nil{
+		if err := ag.Launch(); err != nil {
 			return err
 		}
 
 		/**
 		This block will be used to run the tests
-		 */
-
-
-
+		*/
 
 		time.Sleep(1 * time.Minute)
 
-
-
-		if err := executeOSCommands(settings,scenario.After); err != nil {
+		if err := executeOSCommands(settings, scenario.After); err != nil {
 			println(err.Error())
 		}
-		if err:=ag.Stop();err!=nil{
+		if err := ag.Stop(); err != nil {
 			return err
 		}
 	}
@@ -47,13 +42,13 @@ func Exec(ag agent.Agent, settings settings.Settings) error{
 }
 
 func executeOSCommands(settings settings.Settings, statements []string) error {
-	logger:=settings.Logger()
-	rootDir:=settings.RootDir()
+	logger := settings.Logger()
+	rootDir := settings.RootDir()
 	for i := range statements {
 		stmt := statements[i]
-		logger.Debugf("execute command '%s' from path '%s'",stmt, rootDir)
+		logger.Debugf("execute command '%s' from path '%s'", stmt, rootDir)
 		cmd := exec.Command("bash", "-c", stmt)
-		cmd.Dir=rootDir
+		cmd.Dir = rootDir
 		stdout, err := cmd.Output()
 		if err != nil {
 			logrus.Error(stdout)
@@ -62,4 +57,3 @@ func executeOSCommands(settings settings.Settings, statements []string) error {
 	}
 	return nil
 }
-
