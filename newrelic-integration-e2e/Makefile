@@ -9,7 +9,6 @@ ROOT_DIR=?
 VERBOSE=?
 LICENSE_KEY=?
 GH_ACTION_DIR=$(CURDIR)/../
-AGENT_INITIALIZED_FILE=$(GH_ACTION_DIR)/.agent_dir
 
 all: clean validate test docker-build
 
@@ -26,7 +25,7 @@ validate:
 
 run:
 	@printf "=== $(NAME) === [ run / $* ]: running the binary "
-	go run $(GH_ACTION_DIR)/$(NAME)/main.go --agent_dir=$(GH_ACTION_DIR)/deploy --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+	go run $(GH_ACTION_DIR)/$(NAME)/main.go --root_dir=${GH_ACTION_DIR} --agent_dir=$(GH_ACTION_DIR)/agent_dir --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 test:
 	@echo "=== $(NAME) === [ test ]: running unit tests..."

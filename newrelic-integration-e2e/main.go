@@ -15,15 +15,17 @@ const (
 	flagVerboseMode = "verbose_mode"
 	flagLicenseKey  = "license_key"
 	flagAgentDir    = "agent_dir"
+	flagRootDir     = "root_dir"
 )
 
 //go:embed resources/docker-compose.yml.tmpl
 var dockerComposeTemplate string
 
-func processCliArgs() (string, string, string, logrus.Level) {
+func processCliArgs() (string, string, string, string, logrus.Level) {
 	specsPathPtr := flag.String(flagSpecPath, "", "Relative path to the spec file")
 	licenseKeyPtr := flag.String(flagLicenseKey, "", "New Relic License Key")
 	agentDir := flag.String(flagAgentDir, "", "Directory used to deploy the agent")
+	flagRootDirPtr := flag.String(flagRootDir, "", "workspace directory")
 	verboseModePtr := flag.Bool(flagVerboseMode, false, "If true the debug level is enabled")
 	flag.Parse()
 	if *licenseKeyPtr == "" {
@@ -32,23 +34,27 @@ func processCliArgs() (string, string, string, logrus.Level) {
 	if *specsPathPtr == "" {
 		logrus.Fatalf("missing required spec_path")
 	}
+	if *flagRootDirPtr == "" {
+		logrus.Fatalf("missing required root_dir")
+	}
 	logLevel := logrus.InfoLevel
 	if *verboseModePtr {
 		logLevel = logrus.DebugLevel
 	}
-	return *licenseKeyPtr, *specsPathPtr, *agentDir, logLevel
+	return *licenseKeyPtr, *specsPathPtr, *flagRootDirPtr, *agentDir, logLevel
 
 }
 
 func main() {
 	logrus.Info("running executor")
 
-	licenseKey, specPath, agentDir, logLevel := processCliArgs()
+	licenseKey, specPath, rootDir, agentDir, logLevel := processCliArgs()
 	settings, err := settings.New(
 		settings.WithSpecPath(specPath),
 		settings.WithLogLevel(logLevel),
 		settings.WithLicenseKey(licenseKey),
 		settings.WithAgentDir(agentDir),
+		settings.WithRootDir(rootDir),
 	)
 	if err != nil {
 		logrus.Fatalf("error loading settings: %s", err)

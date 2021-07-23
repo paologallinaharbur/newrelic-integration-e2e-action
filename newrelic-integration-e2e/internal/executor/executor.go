@@ -17,7 +17,7 @@ func Exec(ag agent.Agent, settings settings.Settings) error{
 		if err:=ag.SetUp(scenario);err!=nil{
 			return err
 		}
-		if err := executeOSCommands(scenario.Before); err != nil {
+		if err := executeOSCommands(settings.RootDir(),scenario.Before); err != nil {
 			return err
 		}
 		if err:=ag.Launch();err!=nil{
@@ -35,7 +35,7 @@ func Exec(ag agent.Agent, settings settings.Settings) error{
 
 
 
-		if err := executeOSCommands(scenario.After); err != nil {
+		if err := executeOSCommands(settings.RootDir(),scenario.After); err != nil {
 			println(err.Error())
 		}
 		if err:=ag.Stop();err!=nil{
@@ -46,11 +46,12 @@ func Exec(ag agent.Agent, settings settings.Settings) error{
 	return nil
 }
 
-func executeOSCommands(statements []string) error {
+func executeOSCommands(rootDir string, statements []string) error {
 	for i := range statements {
 		stmt := statements[i]
 		fmt.Println(stmt)
 		cmd := exec.Command("bash", "-c", stmt)
+		cmd.Dir=rootDir
 		_, err := cmd.Output()
 		if err != nil {
 			return err
