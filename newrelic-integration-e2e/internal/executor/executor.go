@@ -7,6 +7,7 @@ import (
 
 	"github.com/newrelic/newrelic-integration-e2e/pkg/agent"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
+	"github.com/sirupsen/logrus"
 )
 
 func Exec(ag agent.Agent, settings settings.Settings) error{
@@ -52,8 +53,9 @@ func executeOSCommands(rootDir string, statements []string) error {
 		fmt.Println(stmt)
 		cmd := exec.Command("bash", "-c", stmt)
 		cmd.Dir=rootDir
-		_, err := cmd.Output()
+		stdout, err := cmd.Output()
 		if err != nil {
+			logrus.Error(stdout)
 			return err
 		}
 	}
