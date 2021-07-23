@@ -4,9 +4,8 @@ import (
 	_ "embed"
 	"io/ioutil"
 	"path/filepath"
-	"text/template"
 
-	"github.com/newrelic/newrelic-integration-e2e/internal/docker"
+	"github.com/newrelic/newrelic-integration-e2e/internal/docker-compose"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
@@ -14,86 +13,93 @@ import (
 )
 
 const (
-	integrationsCfgDir  = "integrations.d"
-	integrationsBinDir  = "bin"
-	dockerCompose       = "docker-compose.yml"
-	defConfigFile       = "nri-config.yml"
-	varIntegrationNames = "integrations"
-	varLicenseKey       = "licenseKey"
+	integrationsCfgDir = "integrations.d"
+	exportersDir       = "exporters"
+	integrationsBinDir = "bin"
+	dockerCompose      = "docker-compose.yml"
+	defConfigFile      = "nri-config.yml"
+	containerName      = "agent"
+	infraAgentDir      = "newrelic-infra-agent"
 )
 
 type Agent interface {
-	SetUp(scenario spec.Scenario) error
+	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
 	Launch() error
+	Stop() error
 }
 
 type agent struct {
-	agentDir              string
-	pathDockerCompose     string
-	configsDir            string
-	binsDir               string
-	dockerComposeTemplate string
-	licenseKey            string
-	defConfigFile         string
-	rootDir               string
-	logger                *logrus.Logger
+	scenario          spec.Scenario
+	agentDir          string
+	configsDir        string
+	exportersDir      string
+	binsDir           string
+	licenseKey        string
+	defConfigFile     string
+	rootDir           string
+	dockerComposePath string
+	logger            *logrus.Logger
+	overrides         *spec.Agent
 }
 
-func NewAgent(settings settings.Settings, dockerComposeTemplate string) *agent {
+func NewAgent(settings settings.Settings) *agent {
 	agentDir := settings.AgentDir()
 	return &agent{
-		rootDir:               settings.RootDir(),
-		agentDir:              agentDir,
-		pathDockerCompose:     filepath.Join(agentDir, dockerCompose),
-		configsDir:            filepath.Join(agentDir, integrationsCfgDir),
-		binsDir:               filepath.Join(agentDir, integrationsBinDir),
-		defConfigFile:         filepath.Join(agentDir, integrationsCfgDir, defConfigFile),
-		dockerComposeTemplate: dockerComposeTemplate,
-		licenseKey:            settings.LicenseKey(),
-		logger:                settings.Logger(),
+		rootDir:           settings.RootDir(),
+		agentDir:          agentDir,
+		configsDir:        filepath.Join(agentDir, infraAgentDir, integrationsCfgDir),
+		exportersDir:      filepath.Join(agentDir, infraAgentDir, exportersDir),
+		binsDir:           filepath.Join(agentDir, infraAgentDir, integrationsBinDir),
+		defConfigFile:     filepath.Join(agentDir, infraAgentDir, integrationsCfgDir, defConfigFile),
+		dockerComposePath: filepath.Join(agentDir, dockerCompose),
+		licenseKey:        settings.LicenseKey(),
+		logger:            settings.Logger(),
+		overrides:         settings.Spec().AgentOverrides,
 	}
 }
 
 func (a *agent) initialize() error {
-	a.logger.Debug("removing the content of the root folder")
-	if err := removeDirectoryContent(a.agentDir); err != nil {
+	a.logger.Debug("removing temporary folders")
+	if err := removeDirectories(a.exportersDir, a.configsDir, a.binsDir); err != nil {
 		return err
 	}
-	a.logger.Debug("creating the required folders by the agent")
-	return makeDirs(0777, a.configsDir, a.binsDir)
+	a.logger.Debug("creating folders required by the agent")
+	return makeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
-func (a *agent) addIntegration(integration spec.Integration) error {
-	if integration.Path == "" {
+func (a *agent) addIntegration(logger *logrus.Logger, integration spec.Integration) error {
+	if integration.BinaryPath == "" {
 		return nil
 	}
-	if _, err := copyFile(filepath.Join(a.rootDir, integration.Path), filepath.Join(a.agentDir, integrationsBinDir, filepath.Base(integration.Path))); err != nil {
-		return err
-	}
-	return nil
+	source := filepath.Join(a.rootDir, integration.BinaryPath)
+	destination := filepath.Join(a.binsDir, integration.Name)
+	logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	return copyFile(source, destination)
 }
 
-func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
+func (a *agent) addPrometheusExporter(logger *logrus.Logger, integration spec.Integration) error {
+	if integration.ExporterBinaryPath == "" {
+		return nil
+	}
+	exporterName := filepath.Base(integration.ExporterBinaryPath)
+	source := filepath.Join(a.rootDir, integration.ExporterBinaryPath)
+	destination := filepath.Join(a.exportersDir, exporterName)
+	logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	return copyFile(source, destination)
+}
+
+func (a *agent) addIntegrationsConfigFile(logger *logrus.Logger, integrations []spec.Integration) error {
 	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(a.agentDir, integrationsCfgDir, "nri-config.yml"), content, 0777)
+	cfgPath := filepath.Join(a.configsDir, defConfigFile)
+	logger.Debugf("create config file '%s' in  '%s'", defConfigFile, cfgPath)
+	return ioutil.WriteFile(cfgPath, content, 0777)
 }
 
-func (a *agent) addDockerCompose(licenseKey string, integrations []string) error {
-	t, err := template.New("").Parse(a.dockerComposeTemplate)
-	if err != nil {
-		return err
-	}
-	vars := map[string]interface{}{
-		varIntegrationNames: integrations,
-		varLicenseKey:       licenseKey,
-	}
-	return processTemplate(t, vars, a.pathDockerCompose)
-}
-
-func (a *agent) SetUp(scenario spec.Scenario) error {
+func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
+	a.scenario = scenario
 	if err := a.initialize(); err != nil {
 		return err
 	}
@@ -101,17 +107,35 @@ func (a *agent) SetUp(scenario spec.Scenario) error {
 	a.logger.Debugf("there are %d integrations", len(integrations))
 	integrationsNames := make([]string, len(integrations))
 	for i := range integrations {
-		if err := a.addIntegration(integrations[i]); err != nil {
+		integration := integrations[i]
+		if err := a.addIntegration(logger, integration); err != nil {
 			return err
 		}
-		integrationsNames[i] = integrations[i].Name
+		if err := a.addPrometheusExporter(logger, integration); err != nil {
+			return err
+		}
+		integrationsNames[i] = integration.Name
 	}
-	if err := a.addIntegrationsConfigFile(integrations); err != nil {
+	if err := a.addIntegrationsConfigFile(logger, integrations); err != nil {
 		return err
 	}
-	return a.addDockerCompose(a.licenseKey, integrationsNames)
+	for k, v := range a.overrides.Integrations {
+		source := filepath.Join(a.rootDir, v)
+		destination := filepath.Join(a.binsDir, k)
+		return copyFile(source, destination)
+	}
+	return nil
 }
 
 func (a *agent) Launch() error {
-	return docker.DockerComposeUp(filepath.Join(a.agentDir, dockerCompose))
+
+	return docker_compose.Run(a.dockerComposePath, containerName, map[string]string{
+		"NRIA_VERBOSE":     "1",
+		"NRIA_LICENSE_KEY": a.licenseKey,
+	})
+}
+
+func (a *agent) Stop() error {
+
+	return docker_compose.Down(a.dockerComposePath)
 }

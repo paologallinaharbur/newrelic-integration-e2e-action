@@ -18,6 +18,7 @@ type settingOptions struct {
 	specParentDir string
 	licenseKey    string
 	agentDir      string
+	rootDir       string
 }
 
 type Option func(*settingOptions)
@@ -44,6 +45,12 @@ func WithLicenseKey(licenseKey string) Option {
 func WithAgentDir(agentDir string) Option {
 	return func(o *settingOptions) {
 		o.agentDir = agentDir
+	}
+}
+
+func WithRootDir(rootDir string) Option {
+	return func(o *settingOptions) {
+		o.rootDir = rootDir
 	}
 }
 
@@ -97,14 +104,14 @@ func New(
 		return nil, err
 	}
 	logger.Debug("parsing the content of the spec file")
-	spec, err := spec.ParseSpecFile(content)
+	s, err := spec.ParseSpecFile(content)
 	if err != nil {
 		return nil, err
 	}
 	logger.Debug("return with settings")
 	return &settings{
 		logger:        logger,
-		spec:          spec,
+		spec:          s,
 		agentDir:      options.agentDir,
 		specParentDir: options.specParentDir,
 		licenseKey:    options.licenseKey,
