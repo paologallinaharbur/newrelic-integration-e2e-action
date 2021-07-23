@@ -18,9 +18,6 @@ const (
 	flagRootDir     = "root_dir"
 )
 
-//go:embed resources/docker-compose.yml.tmpl
-var dockerComposeTemplate string
-
 func processCliArgs() (string, string, string, string, logrus.Level) {
 	specsPathPtr := flag.String(flagSpecPath, "", "Relative path to the spec file")
 	licenseKeyPtr := flag.String(flagLicenseKey, "", "New Relic License Key")
