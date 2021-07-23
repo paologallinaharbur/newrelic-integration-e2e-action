@@ -11,9 +11,10 @@ import (
 
 func Exec(ag agent.Agent, settings settings.Settings) error {
 	spec := settings.Spec()
+	logger := settings.Logger()
 	for i := range spec.Scenarios {
 		scenario := spec.Scenarios[i]
-		settings.Logger().Debugf("[scenario]: %s", scenario.Description)
+		logger.Debugf("[scenario]: %s", scenario.Description)
 		if err := ag.SetUp(settings.Logger(), scenario); err != nil {
 			return err
 		}
@@ -31,7 +32,7 @@ func Exec(ag agent.Agent, settings settings.Settings) error {
 		time.Sleep(1 * time.Minute)
 
 		if err := executeOSCommands(settings, scenario.After); err != nil {
-			println(err.Error())
+			logger.Error(err)
 		}
 		if err := ag.Stop(); err != nil {
 			return err
@@ -50,8 +51,8 @@ func executeOSCommands(settings settings.Settings, statements []string) error {
 		cmd := exec.Command("bash", "-c", stmt)
 		cmd.Dir = rootDir
 		stdout, err := cmd.Output()
+		logrus.Debug(stdout)
 		if err != nil {
-			logrus.Error(stdout)
 			return err
 		}
 	}
