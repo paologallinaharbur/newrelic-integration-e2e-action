@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -23,7 +25,7 @@ func Run(path string, container string, envVars map[string]string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return  cmd.Run()
+	return cmd.Run()
 }
 
 func Down(path string) error {
@@ -32,9 +34,8 @@ func Down(path string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err:=cmd.Run()
-	fmt.Println(cmd.Output())
-	return  err
+
+	return cmd.Run()
 }
 
 func Build(path string, container string) error {
@@ -43,18 +44,14 @@ func Build(path string, container string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err:=cmd.Run()
-	fmt.Println(cmd.Output())
-	return  err
+	return cmd.Run()
 }
 
 func Logs(path string) error {
 	args := []string{"-f", path, "logs"}
 	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerComposeBin, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err:=cmd.Run()
-	fmt.Println(cmd.Output())
-	return  err
+	stdout, err := cmd.Output()
+	logrus.Debug(stdout)
+	return err
 }
