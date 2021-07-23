@@ -27,7 +27,7 @@ type Scenario struct {
 	Description  string        `yaml:"description"`
 	Integrations []Integration `yaml:"integrations"`
 	Before       []string      `yaml:"before"`
-	After       []string      `yaml:"after"`
+	After        []string      `yaml:"after"`
 }
 
 func (s *Scenario) validate() error {

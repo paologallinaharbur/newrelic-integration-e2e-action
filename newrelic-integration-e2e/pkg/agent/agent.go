@@ -23,7 +23,7 @@ const (
 )
 
 type Agent interface {
-	SetUp(logger *logrus.Logger,scenario spec.Scenario) error
+	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
 	Launch() error
 	Stop() error
 }
