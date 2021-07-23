@@ -16,7 +16,7 @@ runs:
   using: "composite"
   steps:
     - id: run-spec
-      run: go run newrelic-integration-e2e/main.go --agent_dir=agent_dir --license_key=${{ inputs.license_key }} --root_dir=${{ github.workspace }} --spec_path=${{ github.workspace }}/${{ inputs.spec_path }} --verbose_mode=${{ inputs.verbose }}
+      run: go run ${{ github.action_path }}/newrelic-integration-e2e/main.go --agent_dir=agent_dir --license_key=${{ inputs.license_key }} --root_dir=${{ github.workspace }} --spec_path=${{ github.workspace }}/${{ inputs.spec_path }} --verbose_mode=${{ inputs.verbose }}
       #run: make -C ${{ github.action_path }}/newrelic-integration-e2e ROOT_DIR=${{ github.action_path }} LICENSE_KEY=${{ inputs.license_key }} SPEC_PATH=${{ github.workspace }}/${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
       shell: bash
 
