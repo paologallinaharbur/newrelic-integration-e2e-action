@@ -4,9 +4,9 @@ import (
 	_ "embed"
 	"flag"
 
-	"github.com/newrelic/newrelic-integration-e2e/internal/executor"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/agent"
 	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
+	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -46,7 +46,7 @@ func main() {
 	logrus.Info("running executor")
 
 	licenseKey, specPath, rootDir, agentDir, logLevel := processCliArgs()
-	settings, err := settings.New(
+	s, err := settings.New(
 		settings.WithSpecPath(specPath),
 		settings.WithLogLevel(logLevel),
 		settings.WithLicenseKey(licenseKey),
@@ -54,15 +54,15 @@ func main() {
 		settings.WithRootDir(rootDir),
 	)
 	if err != nil {
-		logrus.Fatalf("error loading settings: %s", err)
+		logrus.Fatalf("error loading s: %s", err)
 	}
-	logger := settings.Logger()
+	logger := s.Logger()
 	logger.Debug("validating the spec definition")
-	if err := settings.Spec().Validate(); err != nil {
+	if err := s.Spec().Validate(); err != nil {
 		logger.Fatalf("error validating the spec definition: %s", err)
 	}
-	ag := agent.NewAgent(settings)
-	if err := executor.Exec(ag, settings); err != nil {
+	ag := agent.NewAgent(s)
+	if err := spec.Exec(ag, s); err != nil {
 		logger.Fatal(err)
 	}
 	logger.Info("execution completed successfully!")
