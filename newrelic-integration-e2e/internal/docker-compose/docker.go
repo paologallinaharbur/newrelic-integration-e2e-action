@@ -1,20 +1,16 @@
-package docker
+package docker_compose
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 const (
 	dockerComposeBin = "docker-compose"
 )
 
-func DockerComposeRun(path string, container string, envVars map[string]string) error {
-	if err := DockerComposeBuild(path, container); err != nil {
-		return err
-	}
+func Run(path string, container string, envVars map[string]string) error {
 	args := []string{"-f", path, "run"}
 	for k, v := range envVars {
 		args = append(args, "-e", fmt.Sprintf("%s=%s", k, v))
@@ -26,17 +22,8 @@ func DockerComposeRun(path string, container string, envVars map[string]string) 
 	return cmd.Run()
 }
 
-func DockerComposeDown(path string) error {
+func Down(path string) error {
 	args := []string{"-f", path, "down", "-v"}
-	cmd := exec.Command(dockerComposeBin, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
-}
-
-func DockerComposeBuild(path string, container string) error {
-	args := []string{"-f", path, "build", "--no-cache", container}
-	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
