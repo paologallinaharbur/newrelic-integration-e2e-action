@@ -23,7 +23,7 @@ func Run(path string, container string, envVars map[string]string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	return  cmd.Run()
 }
 
 func Down(path string) error {
@@ -32,7 +32,9 @@ func Down(path string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	err:=cmd.Run()
+	fmt.Println(cmd.Output())
+	return  err
 }
 
 func Build(path string, container string) error {
@@ -41,7 +43,9 @@ func Build(path string, container string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	err:=cmd.Run()
+	fmt.Println(cmd.Output())
+	return  err
 }
 
 func Logs(path string) error {
@@ -50,5 +54,7 @@ func Logs(path string) error {
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	err:=cmd.Run()
+	fmt.Println(cmd.Output())
+	return  err
 }
