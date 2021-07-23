@@ -25,7 +25,7 @@ validate:
 
 run:
 	@printf "=== $(NAME) === [ run / $* ]: running the binary "
-	go run $(GH_ACTION_DIR)/$(NAME)/main.go --root_dir=${GH_ACTION_DIR} --agent_dir=$(GH_ACTION_DIR)/agent_dir --license_key=$(LICENSE_KEY) --spec_path=$(SPEC_PATH) --verbose_mode=$(VERBOSE)
+	go run $(GH_ACTION_DIR)/$(NAME)/main.go --root_dir=${ROOT_DIR} --agent_dir=$(GH_ACTION_DIR)/agent_dir --license_key=$(LICENSE_KEY) --spec_path=$(ROOT_DIR)/$(SPEC_PATH) --verbose_mode=$(VERBOSE)
 
 test:
 	@echo "=== $(NAME) === [ test ]: running unit tests..."
