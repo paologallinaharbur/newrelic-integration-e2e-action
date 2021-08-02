@@ -1,6 +1,6 @@
 package agent
 
-import "github.com/newrelic/newrelic-integration-e2e/pkg/spec"
+import "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
 
 type agentIntegration struct {
 	Name   string                 `yaml:"name"`

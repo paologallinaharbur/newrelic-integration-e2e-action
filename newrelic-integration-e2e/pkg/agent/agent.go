@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/newrelic/newrelic-integration-e2e/internal/docker-compose"
-	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
-	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/dockercompose"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/settings"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -129,7 +129,7 @@ func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
 
 func (a *agent) Launch() error {
 
-	return docker_compose.Run(a.dockerComposePath, containerName, map[string]string{
+	return dockercompose.Run(a.dockerComposePath, containerName, map[string]string{
 		"NRIA_VERBOSE":     "1",
 		"NRIA_LICENSE_KEY": a.licenseKey,
 	})
@@ -137,5 +137,5 @@ func (a *agent) Launch() error {
 
 func (a *agent) Stop() error {
 
-	return docker_compose.Down(a.dockerComposePath)
+	return dockercompose.Down(a.dockerComposePath)
 }

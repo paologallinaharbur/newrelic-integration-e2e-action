@@ -21,6 +21,17 @@ scenarios:
           powerdns_url: http://localhost:8081/api/v1/
           exporter_port: 9121
           api_key: authoritative-secret
+    tests:
+      nrqls:
+        - query: ""
+      entities:
+        - type: ""
+          metric_name: ""
+          data_type: ""
+      metrics:
+        - source: ""
+          except: ""
+          additionals: ""
   - description: |
       This scenario will verify that metrics froms PDNS recursor
       are correcly collected.
@@ -36,6 +47,18 @@ scenarios:
           powerdns_url: http://localhost:8082/api/v1/
           exporter_port: 9122
           api_key: recursor-secret
+    tests:
+      nrqls:
+        - query: ""
+      entities:
+        - name: ""
+          metric_name: ""
+          data_type: ""
+
+      metrics:
+        - source: ""
+          except: ""
+          additionals: ""
   - description: |
       This scenario will verify that metrics from both PDNS authoritative & PDNS recursor
       are correcly collected.
@@ -58,3 +81,15 @@ scenarios:
           powerdns_url: http://localhost:8082/api/v1/
           exporter_port: 9122
           api_key: recursor-secret
+    tests:
+      nrqls:
+        - query: ""
+      entities:
+        - name: ""
+          metric_name: ""
+          data_type: ""
+
+      metrics:
+        - source: ""
+          except: ""
+          additionals: ""

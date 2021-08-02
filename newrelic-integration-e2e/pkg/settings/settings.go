@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,6 +19,8 @@ type settingOptions struct {
 	licenseKey    string
 	agentDir      string
 	rootDir       string
+	accountID     int
+	apiKey        string
 }
 
 type Option func(*settingOptions)
@@ -54,12 +56,26 @@ func WithRootDir(rootDir string) Option {
 	}
 }
 
+func WithAccountID(accountID int) Option {
+	return func(o *settingOptions) {
+		o.accountID = accountID
+	}
+}
+
+func WithApiKey(apiKey string) Option {
+	return func(o *settingOptions) {
+		o.apiKey = apiKey
+	}
+}
+
 type Settings interface {
 	Logger() *logrus.Logger
 	Spec() *spec.Definition
 	AgentDir() string
 	RootDir() string
 	LicenseKey() string
+	ApiKey() string
+	AccountID() int
 }
 
 type settings struct {
@@ -68,6 +84,8 @@ type settings struct {
 	specParentDir string
 	agentDir      string
 	licenseKey    string
+	accountID     int
+	apiKey        string
 }
 
 func (s *settings) Logger() *logrus.Logger {
@@ -88,6 +106,14 @@ func (s *settings) AgentDir() string {
 
 func (s *settings) RootDir() string {
 	return s.specParentDir
+}
+
+func (s *settings) ApiKey() string {
+	return s.apiKey
+}
+
+func (s *settings) AccountID() int {
+	return s.accountID
 }
 
 // New returns a Scheduler
@@ -115,5 +141,7 @@ func New(
 		agentDir:      options.agentDir,
 		specParentDir: options.specParentDir,
 		licenseKey:    options.licenseKey,
+		apiKey:        options.apiKey,
+		accountID:     options.accountID,
 	}, nil
 }
