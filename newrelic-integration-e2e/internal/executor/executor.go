@@ -18,6 +18,7 @@ func Exec(ag agent.Agent, nrc newrelic.DataClient, settings settings.Settings) e
 	testSpec := settings.Spec()
 	logger := settings.Logger()
 	for _, scenario := range testSpec.Scenarios {
+		// TODO Improve tag with more info from each scenario
 		scenarioTag := RandStringRunes(10)
 		logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description, scenarioTag)
 
