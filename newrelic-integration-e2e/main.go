@@ -16,7 +16,7 @@ const (
 	flagSpecPath    = "spec_path"
 	flagVerboseMode = "verbose_mode"
 	flagApiKey      = "api_key"
-	flagAccountID   = "api_key"
+	flagAccountID   = "account_id"
 	flagLicenseKey  = "license_key"
 	flagAgentDir    = "agent_dir"
 	flagRootDir     = "root_dir"
