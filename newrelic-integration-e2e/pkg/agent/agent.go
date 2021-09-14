@@ -2,6 +2,7 @@ package agent
 
 import (
 	_ "embed"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
@@ -20,11 +21,12 @@ const (
 	defConfigFile      = "nri-config.yml"
 	containerName      = "agent"
 	infraAgentDir      = "newrelic-infra-agent"
+	customTagKey       = "testKey"
 )
 
 type Agent interface {
 	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
-	Launch() error
+	Launch(scenarioTag string) error
 	Stop() error
 }
 
@@ -127,11 +129,12 @@ func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
 	return nil
 }
 
-func (a *agent) Launch() error {
+func (a *agent) Launch(scenarioTag string) error {
 
 	return dockercompose.Run(a.dockerComposePath, containerName, map[string]string{
-		"NRIA_VERBOSE":     "1",
-		"NRIA_LICENSE_KEY": a.licenseKey,
+		"NRIA_VERBOSE":           "1",
+		"NRIA_LICENSE_KEY":       a.licenseKey,
+		"NRIA_CUSTOM_ATTRIBUTES": fmt.Sprintf(`'{"%s":"%s"}'`, customTagKey, scenarioTag),
 	})
 }
 
