@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNrClient_FindEntityByGUID(t *testing.T) {
+func TestNrClient_FindEntityGUID(t *testing.T) {
 	t.Skipped()
 	const apiKey = "XXXXXXXX"
 	const accountID = 2762945
@@ -20,11 +20,15 @@ func TestNrClient_FindEntityByGUID(t *testing.T) {
 		apiClient,
 	}
 
-	a, err := client.FindEntityGUID("Metric", "haproxy.frontend.connectionsPerSecond", "")
+	entityGUID, err := client.FindEntityGUID("Metric", "windowsService.service.status", "")
 	require.NoError(t, err)
-	require.NotEmpty(t, a)
+	require.NotEmpty(t, entityGUID)
+
+	entity, err := client.FindEntityByGUID(entityGUID)
+	require.NoError(t, err)
+	require.NotEmpty(t, entity)
 }
 
-func TestNrClient_FindEntityGUID(t *testing.T) {
+func TestNrClient_FindEntityByGUID(t *testing.T) {
 	t.Skipped()
 }

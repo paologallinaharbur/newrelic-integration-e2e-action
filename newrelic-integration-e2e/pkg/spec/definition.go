@@ -1,8 +1,6 @@
 package spec
 
-import (
-	"gopkg.in/yaml.v3"
-)
+import yaml "gopkg.in/yaml.v3"
 
 type Definition struct {
 	Description    string     `yaml:"description"`
@@ -53,16 +51,16 @@ type Metrics struct {
 	Except    []string `yaml:"except"`
 }
 type Tests struct {
-	NRQLs    []NRQLs    `yaml:"NRQLs"`
-	Entities []Entities `yaml:"entities"`
-	Metrics  []Metrics  `yaml:"metrics"`
+	NRQLs    []NRQL    `yaml:"nrqls"`
+	Entities []Entity  `yaml:"entities"`
+	Metrics  []Metrics `yaml:"metrics"`
 }
 
-type NRQLs struct {
+type NRQL struct {
 	Query string `yaml:"query"`
 }
 
-type Entities struct {
+type Entity struct {
 	Type       string `yaml:"type"`
 	DataType   string `yaml:"data_type"`
 	MetricName string `yaml:"metric_name"`

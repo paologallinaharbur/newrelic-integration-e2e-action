@@ -23,36 +23,36 @@ const (
 )
 
 func processCliArgs() (string, string, string, string, string, int, logrus.Level) {
-	specsPath := *flag.String(flagSpecPath, "", "Relative path to the spec file")
-	licenseKey := *flag.String(flagLicenseKey, "", "New Relic License Key")
-	agentDir := *flag.String(flagAgentDir, "", "Directory used to deploy the agent")
-	rootDir := *flag.String(flagRootDir, "", "workspace directory")
-	verboseMode := *flag.Bool(flagVerboseMode, false, "If true the debug level is enabled")
-	apiKey := *flag.String(flagApiKey, "", "New Relic Api Key")
-	accountID := *flag.Int(flagAccountID, 0, "New Relic accountID to be used")
-
+	specsPath := flag.String(flagSpecPath, "", "Relative path to the spec file")
+	licenseKey := flag.String(flagLicenseKey, "", "New Relic License Key")
+	agentDir := flag.String(flagAgentDir, "", "Directory used to deploy the agent")
+	rootDir := flag.String(flagRootDir, "", "workspace directory")
+	verboseMode := flag.Bool(flagVerboseMode, false, "If true the debug level is enabled")
+	apiKey := flag.String(flagApiKey, "", "New Relic Api Key")
+	accountID := flag.Int(flagAccountID, 0, "New Relic accountID to be used")
 	flag.Parse()
-	if licenseKey == "" {
+
+	if *licenseKey == "" {
 		logrus.Fatalf("missing required license_key")
 	}
-	if specsPath == "" {
+	if *specsPath == "" {
 		logrus.Fatalf("missing required spec_path")
 	}
-	if rootDir == "" {
+	if *rootDir == "" {
 		logrus.Fatalf("missing required root_dir")
 	}
-	if accountID == 0 {
+	if *accountID == 0 {
 		logrus.Fatalf("missing required accountID")
 	}
-	if apiKey == "" {
+	if *apiKey == "" {
 		logrus.Fatalf("missing required apiKey")
 	}
 
 	logLevel := logrus.InfoLevel
-	if verboseMode {
+	if *verboseMode {
 		logLevel = logrus.DebugLevel
 	}
-	return licenseKey, specsPath, rootDir, agentDir, apiKey, accountID, logLevel
+	return *licenseKey, *specsPath, *rootDir, *agentDir, *apiKey, *accountID, logLevel
 
 }
 

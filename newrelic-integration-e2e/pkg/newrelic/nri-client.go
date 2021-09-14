@@ -1,6 +1,7 @@
 package newrelic
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -11,6 +12,12 @@ type DataClient interface {
 	FindEntityGUID(sample string, metricName string, entityTag string) (*entities.EntityGUID, error)
 	FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error)
 }
+
+var (
+	ErrNilEntity = errors.New("nil entity, impossible to dereference")
+	ErrNilGUID   = errors.New("GUID is nil, impossible to find entity")
+	ErrNoResult  = errors.New("query to fetch entity GUID did not return any result")
+)
 
 type nrClient struct {
 	accountID int
@@ -32,15 +39,15 @@ func NewNrClient(apiKey string, accountID int) *nrClient {
 }
 
 func (nrc *nrClient) FindEntityGUID(sample string, metricName string, entityTag string) (*entities.EntityGUID, error) {
-
-	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where tags.testKey = '%s' limit 1", sample, metricName, entityTag)
+	//query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where tags.testKey = '%s' limit 1", sample, metricName, entityTag)
+	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' limit 1", sample, metricName)
 
 	a, err := nrc.client.Query(nrc.accountID, query)
 	if err != nil {
 		return nil, fmt.Errorf("executing query to fetch entity GUID %s, %w", query, err)
 	}
 	if len(a.Results) == 0 {
-		return nil, fmt.Errorf("query to fetch entity GUID did not return any result %s", query)
+		return nil, fmt.Errorf("%w: %s", ErrNoResult, query)
 	}
 	firstResult := a.Results[0]
 	guid := entities.EntityGUID(fmt.Sprintf("%+v", firstResult["entity.guid"]))
@@ -48,9 +55,8 @@ func (nrc *nrClient) FindEntityGUID(sample string, metricName string, entityTag 
 }
 
 func (nrc *nrClient) FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error) {
-
 	if guid == nil {
-		return nil, fmt.Errorf("impossible ot find entity: guid is nil")
+		return nil, ErrNilGUID
 	}
 
 	entity, err := nrc.client.GetEntity(guid)
@@ -59,7 +65,7 @@ func (nrc *nrClient) FindEntityByGUID(guid *entities.EntityGUID) (entities.Entit
 	}
 
 	if entity == nil {
-		return nil, fmt.Errorf("impossible ot deferentiate entity: it is nil")
+		return nil, ErrNilEntity
 	}
 
 	return *entity, nil

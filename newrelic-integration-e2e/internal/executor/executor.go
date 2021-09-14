@@ -69,22 +69,24 @@ func executeOSCommands(settings settings.Settings, statements []string) error {
 // TODO Interface to specify it? needed?
 
 func executeTests(settings settings.Settings, nrc newrelic.DataClient, tests spec.Tests, scenarioTag string) error {
-
-	err := retry(settings.Logger(), 10, 1*time.Minute, func() []error {
-
-		testEntities(tests.Entities, nrc, scenarioTag)
-		//testNRQLs(tests.NRQLs)
-		//testMetrics(tests.Metrics)
-		return nil
+	return retry(settings.Logger(), 10, 1*time.Minute, func() []error {
+		errors := testEntities(tests.Entities, nrc, scenarioTag)
+		errors = append(
+			errors,
+			testNRQLs(tests.NRQLs, nrc, scenarioTag)...,
+		)
+		errors = append(
+			errors,
+			testMetrics(tests.Metrics, nrc, scenarioTag)...,
+		)
+		return errors
 	})
-
-	return err
 }
 
-func testEntities(entities []spec.Entities, nrc newrelic.DataClient, tag string) []error {
+func testEntities(entities []spec.Entity, nrc newrelic.DataClient, tag string) []error {
 	var errors []error
 	for _, e := range entities {
-		guid, err := nrc.FindEntityGUID(e.Type, e.MetricName, tag)
+		guid, err := nrc.FindEntityGUID(e.DataType, e.MetricName, tag)
 		if err != nil {
 			errors = append(errors, fmt.Errorf("finding entity guid: %w", err))
 			continue
@@ -100,5 +102,15 @@ func testEntities(entities []spec.Entities, nrc newrelic.DataClient, tag string)
 			continue
 		}
 	}
+	return errors
+}
+
+func testNRQLs(nrqls []spec.NRQL, nrc newrelic.DataClient, tag string) []error {
+	var errors []error
+	return errors
+}
+
+func testMetrics(metrics []spec.Metrics, nrc newrelic.DataClient, tag string) []error {
+	var errors []error
 	return errors
 }
