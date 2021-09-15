@@ -30,7 +30,7 @@ const (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 type Agent interface {
-	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
+	SetUp(scenario spec.Scenario) error
 	Launch() error
 	Stop() error
 	GetCustomTagKey() string
@@ -81,34 +81,34 @@ func (a *agent) initialize() error {
 	return makeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
-func (a *agent) addIntegration(logger *logrus.Logger, integration spec.Integration) error {
+func (a *agent) addIntegration(integration spec.Integration) error {
 	if integration.BinaryPath == "" {
 		return nil
 	}
 	source := filepath.Join(a.rootDir, integration.BinaryPath)
 	destination := filepath.Join(a.binsDir, integration.Name)
-	logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
 	return copyFile(source, destination)
 }
 
-func (a *agent) addPrometheusExporter(logger *logrus.Logger, integration spec.Integration) error {
+func (a *agent) addPrometheusExporter(integration spec.Integration) error {
 	if integration.ExporterBinaryPath == "" {
 		return nil
 	}
 	exporterName := filepath.Base(integration.ExporterBinaryPath)
 	source := filepath.Join(a.rootDir, integration.ExporterBinaryPath)
 	destination := filepath.Join(a.exportersDir, exporterName)
-	logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
 	return copyFile(source, destination)
 }
 
-func (a *agent) addIntegrationsConfigFile(logger *logrus.Logger, integrations []spec.Integration) error {
+func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
 	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
 	if err != nil {
 		return err
 	}
 	cfgPath := filepath.Join(a.configsDir, defConfigFile)
-	logger.Debugf("create config file '%s' in  '%s'", defConfigFile, cfgPath)
+	a.logger.Debugf("create config file '%s' in  '%s'", defConfigFile, cfgPath)
 	return ioutil.WriteFile(cfgPath, content, 0777)
 }
 
@@ -121,7 +121,7 @@ func (a *agent) generateScenarioTag() {
 	a.customTagValue = string(b)
 }
 
-func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
+func (a *agent) SetUp(scenario spec.Scenario) error {
 	a.generateScenarioTag()
 	a.scenario = scenario
 	if err := a.initialize(); err != nil {
@@ -132,15 +132,15 @@ func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
 	integrationsNames := make([]string, len(integrations))
 	for i := range integrations {
 		integration := integrations[i]
-		if err := a.addIntegration(logger, integration); err != nil {
+		if err := a.addIntegration(integration); err != nil {
 			return err
 		}
-		if err := a.addPrometheusExporter(logger, integration); err != nil {
+		if err := a.addPrometheusExporter(integration); err != nil {
 			return err
 		}
 		integrationsNames[i] = integration.Name
 	}
-	if err := a.addIntegrationsConfigFile(logger, integrations); err != nil {
+	if err := a.addIntegrationsConfigFile(integrations); err != nil {
 		return err
 	}
 	for k, v := range a.overrides.Integrations {

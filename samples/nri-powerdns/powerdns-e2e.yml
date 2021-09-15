@@ -91,6 +91,8 @@ scenarios:
           data_type: "Metric"
           metric_name: "powerdns_recursor_up"
       metrics:
-        - source: ""
-          except: [ ]
+        - source: "powerdns.yml"
+          except:
+            - powerdns_authoritative_answers_bytes_total
+            - powerdns_recursor_cache_lookups_total
           additionals: ""

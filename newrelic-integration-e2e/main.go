@@ -79,10 +79,13 @@ func main() {
 		logger.Fatalf("error validating the spec definition: %s", err)
 	}
 
-	nrc := newrelic.NewNrClient(s.ApiKey(), s.AccountID())
-	ag := agent.NewAgent(s)
+	e2eExecutor := executor.NewExecutor(
+		agent.NewAgent(s),
+		newrelic.NewNrClient(s.ApiKey(), s.AccountID()),
+		s,
+	)
 
-	if err := executor.Exec(ag, nrc, s); err != nil {
+	if err := e2eExecutor.Exec(); err != nil {
 		logger.Fatal(err)
 	}
 
