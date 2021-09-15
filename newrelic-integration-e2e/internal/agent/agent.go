@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/oshelper"
+
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
 
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/dockercompose"
@@ -74,11 +76,11 @@ func NewAgent(settings e2e.Settings) *agent {
 
 func (a *agent) initialize() error {
 	a.logger.Debug("removing temporary folders")
-	if err := removeDirectories(a.exportersDir, a.configsDir, a.binsDir); err != nil {
+	if err := oshelper.RemoveDirectories(a.exportersDir, a.configsDir, a.binsDir); err != nil {
 		return err
 	}
 	a.logger.Debug("creating folders required by the agent")
-	return makeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
+	return oshelper.MakeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
 func (a *agent) addIntegration(integration e2e.Integration) error {
@@ -88,7 +90,7 @@ func (a *agent) addIntegration(integration e2e.Integration) error {
 	source := filepath.Join(a.rootDir, integration.BinaryPath)
 	destination := filepath.Join(a.binsDir, integration.Name)
 	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
-	return copyFile(source, destination)
+	return oshelper.CopyFile(source, destination)
 }
 
 func (a *agent) addPrometheusExporter(integration e2e.Integration) error {
@@ -99,11 +101,11 @@ func (a *agent) addPrometheusExporter(integration e2e.Integration) error {
 	source := filepath.Join(a.rootDir, integration.ExporterBinaryPath)
 	destination := filepath.Join(a.exportersDir, exporterName)
 	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
-	return copyFile(source, destination)
+	return oshelper.CopyFile(source, destination)
 }
 
 func (a *agent) addIntegrationsConfigFile(integrations []e2e.Integration) error {
-	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
+	content, err := yaml.Marshal(getIntegrationList(integrations))
 	if err != nil {
 		return err
 	}
@@ -146,7 +148,7 @@ func (a *agent) SetUp(scenario e2e.Scenario) error {
 	for k, v := range a.overrides.Integrations {
 		source := filepath.Join(a.rootDir, v)
 		destination := filepath.Join(a.binsDir, k)
-		return copyFile(source, destination)
+		return oshelper.CopyFile(source, destination)
 	}
 	return nil
 }

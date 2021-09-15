@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/retrier"
+
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
 
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
@@ -82,7 +84,7 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 
 // TODO Interface to specify it? needed?
 func (ex *Executor) executeTests(tests e2e.Tests) error {
-	return retry(ex.logger, 10, 60*time.Second, func() []error {
+	return retrier.Retry(ex.logger, 10, 60*time.Second, func() []error {
 		errors := ex.testEntities(tests.Entities)
 		errors = append(
 			errors,

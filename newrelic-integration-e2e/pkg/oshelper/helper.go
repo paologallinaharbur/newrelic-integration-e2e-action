@@ -1,4 +1,4 @@
-package agent
+package oshelper
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func removeDirectories(dirs ...string) error {
+func RemoveDirectories(dirs ...string) error {
 	for i := range dirs {
 		dir := dirs[i]
 		if err := os.RemoveAll(dir); err != nil {
@@ -16,7 +16,7 @@ func removeDirectories(dirs ...string) error {
 	return nil
 }
 
-func copyFile(src, dst string) error {
+func CopyFile(src, dst string) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func copyFile(src, dst string) error {
 	return err
 }
 
-func makeDirs(perm os.FileMode, dirs ...string) error {
+func MakeDirs(perm os.FileMode, dirs ...string) error {
 	for i := range dirs {
 		dir := dirs[i]
 		if err := os.Mkdir(dir, perm); err != nil {

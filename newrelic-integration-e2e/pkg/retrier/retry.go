@@ -1,4 +1,4 @@
-package executor
+package retrier
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func retry(log *logrus.Logger, attempts int, sleep time.Duration, f func() []error) error {
+func Retry(log *logrus.Logger, attempts int, sleep time.Duration, f func() []error) error {
 
 	var errors []error
 	for i := 0; i < attempts; i++ {
