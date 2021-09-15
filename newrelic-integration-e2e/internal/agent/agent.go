@@ -8,11 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/oshelper"
-
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
-
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/dockercompose"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/dockercompose"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/oshelper"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 )
