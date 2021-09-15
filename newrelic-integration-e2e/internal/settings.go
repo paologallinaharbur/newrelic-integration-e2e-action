@@ -22,46 +22,46 @@ type settingOptions struct {
 	apiKey        string
 }
 
-type Option func(*settingOptions)
+type SettingOption func(*settingOptions)
 
-func WithSpecPath(specPath string) Option {
+func SettingsWithSpecPath(specPath string) SettingOption {
 	return func(o *settingOptions) {
 		o.specPath = specPath
 		o.specParentDir = filepath.Dir(specPath)
 	}
 }
 
-func WithLogLevel(logLevel logrus.Level) Option {
+func SettingsWithLogLevel(logLevel logrus.Level) SettingOption {
 	return func(o *settingOptions) {
 		o.logLevel = logLevel
 	}
 }
 
-func WithLicenseKey(licenseKey string) Option {
+func SettingsWithLicenseKey(licenseKey string) SettingOption {
 	return func(o *settingOptions) {
 		o.licenseKey = licenseKey
 	}
 }
 
-func WithAgentDir(agentDir string) Option {
+func SettingsWithAgentDir(agentDir string) SettingOption {
 	return func(o *settingOptions) {
 		o.agentDir = agentDir
 	}
 }
 
-func WithRootDir(rootDir string) Option {
+func SettingsWithRootDir(rootDir string) SettingOption {
 	return func(o *settingOptions) {
 		o.rootDir = rootDir
 	}
 }
 
-func WithAccountID(accountID int) Option {
+func SettingsWithAccountID(accountID int) SettingOption {
 	return func(o *settingOptions) {
 		o.accountID = accountID
 	}
 }
 
-func WithApiKey(apiKey string) Option {
+func SettingsWithApiKey(apiKey string) SettingOption {
 	return func(o *settingOptions) {
 		o.apiKey = apiKey
 	}
@@ -117,7 +117,7 @@ func (s *settings) AccountID() int {
 
 // New returns a Scheduler
 func NewSettings(
-	opts ...Option) (Settings, error) {
+	opts ...SettingOption) (Settings, error) {
 	options := defaultSettingsOptions
 	for _, opt := range opts {
 		opt(&options)

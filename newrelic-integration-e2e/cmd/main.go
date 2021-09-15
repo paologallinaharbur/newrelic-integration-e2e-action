@@ -62,13 +62,13 @@ func main() {
 
 	licenseKey, specsPath, rootDir, agentDir, apiKey, accountID, logLevel := processCliArgs()
 	s, err := e2e.NewSettings(
-		e2e.WithSpecPath(specsPath),
-		e2e.WithLogLevel(logLevel),
-		e2e.WithLicenseKey(licenseKey),
-		e2e.WithAgentDir(agentDir),
-		e2e.WithRootDir(rootDir),
-		e2e.WithApiKey(apiKey),
-		e2e.WithAccountID(accountID),
+		e2e.SettingsWithSpecPath(specsPath),
+		e2e.SettingsWithLogLevel(logLevel),
+		e2e.SettingsWithLicenseKey(licenseKey),
+		e2e.SettingsWithAgentDir(agentDir),
+		e2e.SettingsWithRootDir(rootDir),
+		e2e.SettingsWithApiKey(apiKey),
+		e2e.SettingsWithAccountID(accountID),
 	)
 	if err != nil {
 		logrus.Fatalf("error loading s: %s", err)
