@@ -4,7 +4,9 @@ import (
 	_ "embed"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"path/filepath"
+	"time"
 
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/dockercompose"
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/settings"
@@ -22,12 +24,17 @@ const (
 	containerName      = "agent"
 	infraAgentDir      = "newrelic-infra-agent"
 	customTagKey       = "testKey"
+	scenarioTagRuneNr  = 10
 )
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 type Agent interface {
 	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
-	Launch(scenarioTag string) error
+	Launch() error
 	Stop() error
+	GetCustomTagKey() string
+	GetCustomTagValue() string
 }
 
 type agent struct {
@@ -42,10 +49,14 @@ type agent struct {
 	dockerComposePath string
 	logger            *logrus.Logger
 	overrides         *spec.Agent
+	customTagKey      string
+	customTagValue    string
 }
 
 func NewAgent(settings settings.Settings) *agent {
+	rand.Seed(time.Now().UnixNano())
 	agentDir := settings.AgentDir()
+
 	return &agent{
 		rootDir:           settings.RootDir(),
 		agentDir:          agentDir,
@@ -57,6 +68,7 @@ func NewAgent(settings settings.Settings) *agent {
 		licenseKey:        settings.LicenseKey(),
 		logger:            settings.Logger(),
 		overrides:         settings.Spec().AgentOverrides,
+		customTagKey:      customTagKey,
 	}
 }
 
@@ -100,7 +112,17 @@ func (a *agent) addIntegrationsConfigFile(logger *logrus.Logger, integrations []
 	return ioutil.WriteFile(cfgPath, content, 0777)
 }
 
+func (a *agent) generateScenarioTag() {
+	b := make([]rune, scenarioTagRuneNr)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+
+	a.customTagValue = string(b)
+}
+
 func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
+	a.generateScenarioTag()
 	a.scenario = scenario
 	if err := a.initialize(); err != nil {
 		return err
@@ -129,16 +151,23 @@ func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
 	return nil
 }
 
-func (a *agent) Launch(scenarioTag string) error {
+func (a *agent) Launch() error {
 
 	return dockercompose.Run(a.dockerComposePath, containerName, map[string]string{
 		"NRIA_VERBOSE":           "1",
 		"NRIA_LICENSE_KEY":       a.licenseKey,
-		"NRIA_CUSTOM_ATTRIBUTES": fmt.Sprintf(`'{"%s":"%s"}'`, customTagKey, scenarioTag),
+		"NRIA_CUSTOM_ATTRIBUTES": fmt.Sprintf(`{"%s":"%s"}`, a.GetCustomTagKey(), a.GetCustomTagValue()),
 	})
 }
 
 func (a *agent) Stop() error {
-
 	return dockercompose.Down(a.dockerComposePath)
+}
+
+func (a *agent) GetCustomTagKey() string {
+	return a.customTagKey
+}
+
+func (a *agent) GetCustomTagValue() string {
+	return a.customTagValue
 }

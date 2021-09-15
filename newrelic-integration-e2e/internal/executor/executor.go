@@ -18,25 +18,21 @@ func Exec(ag agent.Agent, nrc newrelic.DataClient, settings settings.Settings) e
 	testSpec := settings.Spec()
 	logger := settings.Logger()
 	for _, scenario := range testSpec.Scenarios {
-		// TODO Improve tag with more info from each scenario
-		scenarioTag := RandStringRunes(10)
-		logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description, scenarioTag)
-
+		// TODO Improve tag with more info from each scenario, like GH commit
 		if err := ag.SetUp(settings.Logger(), scenario); err != nil {
 			return err
 		}
+		logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description)
 
 		if err := executeOSCommands(settings, scenario.Before); err != nil {
 			return err
 		}
 
-		if err := ag.Launch(scenarioTag); err != nil {
+		if err := ag.Launch(); err != nil {
 			return err
 		}
 
-		if err := executeTests(settings, nrc, scenario.Tests, scenarioTag); err != nil {
-			return err
-		}
+		errAssertions := executeTests(ag, settings, nrc, scenario.Tests)
 
 		if err := executeOSCommands(settings, scenario.After); err != nil {
 			logger.Error(err)
@@ -44,6 +40,10 @@ func Exec(ag agent.Agent, nrc newrelic.DataClient, settings settings.Settings) e
 
 		if err := ag.Stop(); err != nil {
 			return err
+		}
+
+		if errAssertions != nil {
+			return errAssertions
 		}
 	}
 
@@ -68,25 +68,25 @@ func executeOSCommands(settings settings.Settings, statements []string) error {
 
 // TODO Interface to specify it? needed?
 
-func executeTests(settings settings.Settings, nrc newrelic.DataClient, tests spec.Tests, scenarioTag string) error {
-	return retry(settings.Logger(), 10, 1*time.Minute, func() []error {
-		errors := testEntities(tests.Entities, nrc, scenarioTag)
+func executeTests(ag agent.Agent, settings settings.Settings, nrc newrelic.DataClient, tests spec.Tests) error {
+	return retry(settings.Logger(), 10, 60*time.Second, func() []error {
+		errors := testEntities(tests.Entities, nrc, ag)
 		errors = append(
 			errors,
-			testNRQLs(tests.NRQLs, nrc, scenarioTag)...,
+			testNRQLs(tests.NRQLs, nrc, ag)...,
 		)
 		errors = append(
 			errors,
-			testMetrics(tests.Metrics, nrc, scenarioTag)...,
+			testMetrics(tests.Metrics, nrc, ag)...,
 		)
 		return errors
 	})
 }
 
-func testEntities(entities []spec.Entity, nrc newrelic.DataClient, tag string) []error {
+func testEntities(entities []spec.Entity, nrc newrelic.DataClient, ag agent.Agent) []error {
 	var errors []error
 	for _, e := range entities {
-		guid, err := nrc.FindEntityGUID(e.DataType, e.MetricName, tag)
+		guid, err := nrc.FindEntityGUID(e.DataType, e.MetricName, ag.GetCustomTagKey(), ag.GetCustomTagValue())
 		if err != nil {
 			errors = append(errors, fmt.Errorf("finding entity guid: %w", err))
 			continue
@@ -105,12 +105,12 @@ func testEntities(entities []spec.Entity, nrc newrelic.DataClient, tag string) [
 	return errors
 }
 
-func testNRQLs(nrqls []spec.NRQL, nrc newrelic.DataClient, tag string) []error {
+func testNRQLs(nrqls []spec.NRQL, nrc newrelic.DataClient, ag agent.Agent) []error {
 	var errors []error
 	return errors
 }
 
-func testMetrics(metrics []spec.Metrics, nrc newrelic.DataClient, tag string) []error {
+func testMetrics(metrics []spec.Metrics, nrc newrelic.DataClient, ag agent.Agent) []error {
 	var errors []error
 	return errors
 }

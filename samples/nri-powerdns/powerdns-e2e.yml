@@ -25,9 +25,9 @@ scenarios:
       nrqls:
         - query: ""
       entities:
-        - type: "WINDOWSSERVICE"
+        - type: "POWERDNS_AUTHORITATIVE"
           data_type: "Metric"
-          metric_name: "windowsService.service.status"
+          metric_name: "powerdns_authoritative_up"
       metrics:
         - source: ""
           except: []

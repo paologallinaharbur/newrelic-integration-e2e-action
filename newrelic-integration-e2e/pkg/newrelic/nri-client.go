@@ -9,7 +9,7 @@ import (
 )
 
 type DataClient interface {
-	FindEntityGUID(sample string, metricName string, entityTag string) (*entities.EntityGUID, error)
+	FindEntityGUID(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error)
 	FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error)
 }
 
@@ -38,9 +38,8 @@ func NewNrClient(apiKey string, accountID int) *nrClient {
 	}
 }
 
-func (nrc *nrClient) FindEntityGUID(sample string, metricName string, entityTag string) (*entities.EntityGUID, error) {
-	//query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where tags.testKey = '%s' limit 1", sample, metricName, entityTag)
-	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' limit 1", sample, metricName)
+func (nrc *nrClient) FindEntityGUID(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error) {
+	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where %s = '%s' limit 1", sample, metricName, customTagKey, entityTag)
 
 	a, err := nrc.client.Query(nrc.accountID, query)
 	if err != nil {
