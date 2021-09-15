@@ -1,6 +1,6 @@
 package agent
 
-import "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
+import e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
 
 type agentIntegration struct {
 	Name   string                 `yaml:"name"`
@@ -10,7 +10,7 @@ type agentIntegrationsList struct {
 	Integrations []agentIntegration `yaml:"integrations"`
 }
 
-func createAgentIntegrationModel(integrations []spec.Integration) *agentIntegrationsList {
+func createAgentIntegrationModel(integrations []e2e.Integration) *agentIntegrationsList {
 	out := &agentIntegrationsList{
 		Integrations: make([]agentIntegration, len(integrations)),
 	}
@@ -22,5 +22,4 @@ func createAgentIntegrationModel(integrations []spec.Integration) *agentIntegrat
 		}
 	}
 	return out
-
 }

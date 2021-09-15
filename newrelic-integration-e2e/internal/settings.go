@@ -1,10 +1,9 @@
-package settings
+package e2e
 
 import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -70,7 +69,7 @@ func WithApiKey(apiKey string) Option {
 
 type Settings interface {
 	Logger() *logrus.Logger
-	Spec() *spec.Definition
+	Spec() *Definition
 	AgentDir() string
 	RootDir() string
 	LicenseKey() string
@@ -80,7 +79,7 @@ type Settings interface {
 
 type settings struct {
 	logger        *logrus.Logger
-	spec          *spec.Definition
+	spec          *Definition
 	specParentDir string
 	agentDir      string
 	licenseKey    string
@@ -96,7 +95,7 @@ func (s *settings) LicenseKey() string {
 	return s.licenseKey
 }
 
-func (s *settings) Spec() *spec.Definition {
+func (s *settings) Spec() *Definition {
 	return s.spec
 }
 
@@ -117,7 +116,7 @@ func (s *settings) AccountID() int {
 }
 
 // New returns a Scheduler
-func New(
+func NewSettings(
 	opts ...Option) (Settings, error) {
 	options := defaultSettingsOptions
 	for _, opt := range opts {
@@ -130,7 +129,7 @@ func New(
 		return nil, err
 	}
 	logger.Debug("parsing the content of the spec file")
-	s, err := spec.ParseSpecFile(content)
+	s, err := ParseSpecFile(content)
 	if err != nil {
 		return nil, err
 	}

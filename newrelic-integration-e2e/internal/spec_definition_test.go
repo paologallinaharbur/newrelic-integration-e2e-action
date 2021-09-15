@@ -1,4 +1,4 @@
-package spec
+package e2e
 
 import (
 	"testing"

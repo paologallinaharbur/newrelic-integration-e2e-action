@@ -4,11 +4,12 @@ import (
 	_ "embed"
 	"flag"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/newrelic"
+	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
 
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
+
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/executor"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/agent"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/settings"
 	"github.com/sirupsen/logrus"
 )
 
@@ -60,14 +61,14 @@ func main() {
 	logrus.Info("running executor")
 
 	licenseKey, specsPath, rootDir, agentDir, apiKey, accountID, logLevel := processCliArgs()
-	s, err := settings.New(
-		settings.WithSpecPath(specsPath),
-		settings.WithLogLevel(logLevel),
-		settings.WithLicenseKey(licenseKey),
-		settings.WithAgentDir(agentDir),
-		settings.WithRootDir(rootDir),
-		settings.WithApiKey(apiKey),
-		settings.WithAccountID(accountID),
+	s, err := e2e.NewSettings(
+		e2e.WithSpecPath(specsPath),
+		e2e.WithLogLevel(logLevel),
+		e2e.WithLicenseKey(licenseKey),
+		e2e.WithAgentDir(agentDir),
+		e2e.WithRootDir(rootDir),
+		e2e.WithApiKey(apiKey),
+		e2e.WithAccountID(accountID),
 	)
 	if err != nil {
 		logrus.Fatalf("error loading s: %s", err)

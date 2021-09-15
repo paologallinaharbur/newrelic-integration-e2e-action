@@ -1,4 +1,4 @@
-package spec
+package e2e
 
 import yaml "gopkg.in/yaml.v3"
 

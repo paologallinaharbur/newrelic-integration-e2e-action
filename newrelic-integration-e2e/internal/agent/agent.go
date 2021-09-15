@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
+
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/dockercompose"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/settings"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -30,15 +30,15 @@ const (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 type Agent interface {
-	SetUp(scenario spec.Scenario) error
-	Launch() error
+	SetUp(scenario e2e.Scenario) error
+	Run() error
 	Stop() error
 	GetCustomTagKey() string
 	GetCustomTagValue() string
 }
 
 type agent struct {
-	scenario          spec.Scenario
+	scenario          e2e.Scenario
 	agentDir          string
 	configsDir        string
 	exportersDir      string
@@ -48,12 +48,12 @@ type agent struct {
 	rootDir           string
 	dockerComposePath string
 	logger            *logrus.Logger
-	overrides         *spec.Agent
+	overrides         *e2e.Agent
 	customTagKey      string
 	customTagValue    string
 }
 
-func NewAgent(settings settings.Settings) *agent {
+func NewAgent(settings e2e.Settings) *agent {
 	rand.Seed(time.Now().UnixNano())
 	agentDir := settings.AgentDir()
 
@@ -81,7 +81,7 @@ func (a *agent) initialize() error {
 	return makeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
-func (a *agent) addIntegration(integration spec.Integration) error {
+func (a *agent) addIntegration(integration e2e.Integration) error {
 	if integration.BinaryPath == "" {
 		return nil
 	}
@@ -91,7 +91,7 @@ func (a *agent) addIntegration(integration spec.Integration) error {
 	return copyFile(source, destination)
 }
 
-func (a *agent) addPrometheusExporter(integration spec.Integration) error {
+func (a *agent) addPrometheusExporter(integration e2e.Integration) error {
 	if integration.ExporterBinaryPath == "" {
 		return nil
 	}
@@ -102,7 +102,7 @@ func (a *agent) addPrometheusExporter(integration spec.Integration) error {
 	return copyFile(source, destination)
 }
 
-func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
+func (a *agent) addIntegrationsConfigFile(integrations []e2e.Integration) error {
 	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func (a *agent) generateScenarioTag() {
 	a.customTagValue = string(b)
 }
 
-func (a *agent) SetUp(scenario spec.Scenario) error {
+func (a *agent) SetUp(scenario e2e.Scenario) error {
 	a.generateScenarioTag()
 	a.scenario = scenario
 	if err := a.initialize(); err != nil {
@@ -151,8 +151,7 @@ func (a *agent) SetUp(scenario spec.Scenario) error {
 	return nil
 }
 
-func (a *agent) Launch() error {
-
+func (a *agent) Run() error {
 	return dockercompose.Run(a.dockerComposePath, containerName, map[string]string{
 		"NRIA_VERBOSE":           "1",
 		"NRIA_LICENSE_KEY":       a.licenseKey,

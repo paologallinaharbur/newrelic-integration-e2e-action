@@ -5,24 +5,24 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/newrelic"
+	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
+
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/agent"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/settings"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
 )
 
 type Executor struct {
 	agent    agent.Agent
 	nrClient newrelic.DataClient
 	logger   *logrus.Logger
-	spec     *spec.Definition
+	spec     *e2e.Definition
 	rootDir  string
 }
 
-func NewExecutor(agent agent.Agent, nrClient newrelic.DataClient, settings settings.Settings) *Executor {
+func NewExecutor(agent agent.Agent, nrClient newrelic.DataClient, settings e2e.Settings) *Executor {
 	return &Executor{
 		agent:    agent,
 		nrClient: nrClient,
@@ -44,7 +44,7 @@ func (ex *Executor) Exec() error {
 			return err
 		}
 
-		if err := ex.agent.Launch(); err != nil {
+		if err := ex.agent.Run(); err != nil {
 			return err
 		}
 
@@ -81,8 +81,7 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 }
 
 // TODO Interface to specify it? needed?
-
-func (ex *Executor) executeTests(tests spec.Tests) error {
+func (ex *Executor) executeTests(tests e2e.Tests) error {
 	return retry(ex.logger, 10, 60*time.Second, func() []error {
 		errors := ex.testEntities(tests.Entities)
 		errors = append(
@@ -97,7 +96,7 @@ func (ex *Executor) executeTests(tests spec.Tests) error {
 	})
 }
 
-func (ex *Executor) testEntities(entities []spec.Entity) []error {
+func (ex *Executor) testEntities(entities []e2e.Entity) []error {
 	var errors []error
 	for _, en := range entities {
 		guid, err := ex.nrClient.FindEntityGUID(en.DataType, en.MetricName, ex.agent.GetCustomTagKey(), ex.agent.GetCustomTagValue())
@@ -119,12 +118,12 @@ func (ex *Executor) testEntities(entities []spec.Entity) []error {
 	return errors
 }
 
-func (ex *Executor) testNRQLs(nrqls []spec.NRQL) []error {
+func (ex *Executor) testNRQLs(nrqls []e2e.NRQL) []error {
 	var errors []error
 	return errors
 }
 
-func (ex *Executor) testMetrics(metrics []spec.Metrics) []error {
+func (ex *Executor) testMetrics(metrics []e2e.Metrics) []error {
 	var errors []error
 	return errors
 }

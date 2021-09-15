@@ -20,7 +20,7 @@ func TestNrClient_FindEntityGUID(t *testing.T) {
 		apiClient,
 	}
 
-	entityGUID, err := client.FindEntityGUID("Metric", "windowsService.service.status", "")
+	entityGUID, err := client.FindEntityGUID("Metric", "windowsService.service.status", "testKey", "xxxx")
 	require.NoError(t, err)
 	require.NotEmpty(t, entityGUID)
 
