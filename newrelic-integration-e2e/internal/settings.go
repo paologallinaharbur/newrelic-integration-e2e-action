@@ -1,10 +1,10 @@
-package settings
+package e2e
 
 import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/spec"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,38 +19,52 @@ type settingOptions struct {
 	licenseKey    string
 	agentDir      string
 	rootDir       string
+	accountID     int
+	apiKey        string
 }
 
-type Option func(*settingOptions)
+type SettingOption func(*settingOptions)
 
-func WithSpecPath(specPath string) Option {
+func SettingsWithSpecPath(specPath string) SettingOption {
 	return func(o *settingOptions) {
 		o.specPath = specPath
 		o.specParentDir = filepath.Dir(specPath)
 	}
 }
 
-func WithLogLevel(logLevel logrus.Level) Option {
+func SettingsWithLogLevel(logLevel logrus.Level) SettingOption {
 	return func(o *settingOptions) {
 		o.logLevel = logLevel
 	}
 }
 
-func WithLicenseKey(licenseKey string) Option {
+func SettingsWithLicenseKey(licenseKey string) SettingOption {
 	return func(o *settingOptions) {
 		o.licenseKey = licenseKey
 	}
 }
 
-func WithAgentDir(agentDir string) Option {
+func SettingsWithAgentDir(agentDir string) SettingOption {
 	return func(o *settingOptions) {
 		o.agentDir = agentDir
 	}
 }
 
-func WithRootDir(rootDir string) Option {
+func SettingsWithRootDir(rootDir string) SettingOption {
 	return func(o *settingOptions) {
 		o.rootDir = rootDir
+	}
+}
+
+func SettingsWithAccountID(accountID int) SettingOption {
+	return func(o *settingOptions) {
+		o.accountID = accountID
+	}
+}
+
+func SettingsWithApiKey(apiKey string) SettingOption {
+	return func(o *settingOptions) {
+		o.apiKey = apiKey
 	}
 }
 
@@ -60,6 +74,8 @@ type Settings interface {
 	AgentDir() string
 	RootDir() string
 	LicenseKey() string
+	ApiKey() string
+	AccountID() int
 }
 
 type settings struct {
@@ -68,6 +84,8 @@ type settings struct {
 	specParentDir string
 	agentDir      string
 	licenseKey    string
+	accountID     int
+	apiKey        string
 }
 
 func (s *settings) Logger() *logrus.Logger {
@@ -90,9 +108,17 @@ func (s *settings) RootDir() string {
 	return s.specParentDir
 }
 
+func (s *settings) ApiKey() string {
+	return s.apiKey
+}
+
+func (s *settings) AccountID() int {
+	return s.accountID
+}
+
 // New returns a Scheduler
-func New(
-	opts ...Option) (Settings, error) {
+func NewSettings(
+	opts ...SettingOption) (Settings, error) {
 	options := defaultSettingsOptions
 	for _, opt := range opts {
 		opt(&options)
@@ -115,5 +141,7 @@ func New(
 		agentDir:      options.agentDir,
 		specParentDir: options.specParentDir,
 		licenseKey:    options.licenseKey,
+		apiKey:        options.apiKey,
+		accountID:     options.accountID,
 	}, nil
 }

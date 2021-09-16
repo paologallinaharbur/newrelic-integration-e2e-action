@@ -6,43 +6,65 @@ agent:
     nri-prometheus:  bin/nri-prometheus
 
 scenarios:
-  - description: |
-      This scenario will verify that metrics froms PDNS authoritative
-      are correcly collected.
-    before:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml up -d
-    after:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml down -v
-    integrations:
-      - name: nri-powerdns
-        binary_path: bin/nri-powerdns
-        exporter_binary_path: bin/nri-powerdns-exporter
-        config:
-          powerdns_url: http://localhost:8081/api/v1/
-          exporter_port: 9121
-          api_key: authoritative-secret
-  - description: |
-      This scenario will verify that metrics froms PDNS recursor
-      are correcly collected.
-    before:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml up -d
-    after:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml down -v
-    integrations:
-      - name: nri-powerdns
-        binary_path: bin/nri-powerdns
-        exporter_binary_path: bin/nri-powerdns-exporter
-        config:
-          powerdns_url: http://localhost:8082/api/v1/
-          exporter_port: 9122
-          api_key: recursor-secret
+#  - description: |
+#      This scenario will verify that metrics froms PDNS authoritative
+#      are correcly collected.
+#    before:
+#      - docker-compose -f "deps/docker-compose.yml" up -d
+#    after:
+#      - docker-compose -f "deps/docker-compose.yml" up -d
+#    integrations:
+#      - name: nri-powerdns
+#        binary_path: bin/nri-powerdns
+#        exporter_binary_path: bin/nri-powerdns-exporter
+#        config:
+#          powerdns_url: http://localhost:8081/api/v1/
+#          exporter_port: 9121
+#          api_key: authoritative-secret
+#    tests:
+#      nrqls:
+#        - query: ""
+#      entities:
+#        - type: "POWERDNS_AUTHORITATIVE"
+#          data_type: "Metric"
+#          metric_name: "powerdns_authoritative_up"
+#      metrics:
+#        - source: ""
+#          except: []
+#          additionals: ""
+#  - description: |
+#      This scenario will verify that metrics froms PDNS recursor
+#      are correcly collected.
+#    before:
+#      - docker-compose -f "deps/docker-compose.yml" up -d
+#    after:
+#      - docker-compose -f "deps/docker-compose.yml" down -v
+#    integrations:
+#      - name: nri-powerdns
+#        binary_path: bin/nri-powerdns
+#        exporter_binary_path: bin/nri-powerdns-exporter
+#        config:
+#          powerdns_url: http://localhost:8082/api/v1/
+#          exporter_port: 9122
+#          api_key: recursor-secret
+#    tests:
+#      nrqls:
+#        - query: ""
+#      entities:
+#        - type: "POWERDNS_AUTHORITATIVE"
+#          data_type: "Metric"
+#          metric_name: "powerdns_authoritative_up"
+#      metrics:
+#        - source: ""
+#          except: [ ]
+#          additionals: ""
   - description: |
       This scenario will verify that metrics from both PDNS authoritative & PDNS recursor
       are correcly collected.
     before:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml up -d
+      - docker-compose -f deps/docker-compose.yml up -d
     after:
-      - docker-compose -f /Users/icorrales/Repositories/github.com/newrelic/newrelic-integration-e2e-action/samples/nri-powerdns/deps/docker-compose.yml down -v
+      - docker-compose -f deps/docker-compose.yml down -v
     integrations:
       - name: nri-powerdns
         binary_path: bin/nri-powerdns
@@ -58,3 +80,19 @@ scenarios:
           powerdns_url: http://localhost:8082/api/v1/
           exporter_port: 9122
           api_key: recursor-secret
+    tests:
+      nrqls:
+        - query: ""
+      entities:
+        - type: "POWERDNS_AUTHORITATIVE"
+          data_type: "Metric"
+          metric_name: "powerdns_authoritative_up"
+        - type: "POWERDNS_RECURSOR"
+          data_type: "Metric"
+          metric_name: "powerdns_recursor_up"
+      metrics:
+        - source: "powerdns.yml"
+          except:
+            - powerdns_authoritative_answers_bytes_total
+            - powerdns_recursor_cache_lookups_total
+          additionals: ""

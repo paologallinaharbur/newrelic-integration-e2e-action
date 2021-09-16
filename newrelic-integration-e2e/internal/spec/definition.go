@@ -1,8 +1,6 @@
 package spec
 
-import (
-	"gopkg.in/yaml.v3"
-)
+import yaml "gopkg.in/yaml.v3"
 
 type Definition struct {
 	Description    string     `yaml:"description"`
@@ -28,6 +26,7 @@ type Scenario struct {
 	Integrations []Integration `yaml:"integrations"`
 	Before       []string      `yaml:"before"`
 	After        []string      `yaml:"after"`
+	Tests        Tests         `yaml:"tests"`
 }
 
 func (s *Scenario) validate() error {
@@ -44,6 +43,27 @@ type Integration struct {
 	BinaryPath         string                 `yaml:"binary_path"`
 	ExporterBinaryPath string                 `yaml:"exporter_binary_path"`
 	Config             map[string]interface{} `yaml:"config"`
+}
+
+type Metrics struct {
+	Source    string   `yaml:"source"`
+	Including []string `yaml:"including"`
+	Except    []string `yaml:"except"`
+}
+type Tests struct {
+	NRQLs    []NRQL    `yaml:"nrqls"`
+	Entities []Entity  `yaml:"entities"`
+	Metrics  []Metrics `yaml:"metrics"`
+}
+
+type NRQL struct {
+	Query string `yaml:"query"`
+}
+
+type Entity struct {
+	Type       string `yaml:"type"`
+	DataType   string `yaml:"data_type"`
+	MetricName string `yaml:"metric_name"`
 }
 
 func (i *Integration) validate() error {

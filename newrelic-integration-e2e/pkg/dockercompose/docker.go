@@ -1,4 +1,4 @@
-package docker_compose
+package dockercompose
 
 import (
 	"fmt"
@@ -52,6 +52,8 @@ func Logs(path string) error {
 	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerComposeBin, args...)
 	stdout, err := cmd.Output()
-	logrus.Debug(stdout)
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.Debug("stdout")
+	logrus.Debug(string(stdout))
 	return err
 }

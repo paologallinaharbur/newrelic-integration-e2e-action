@@ -4,19 +4,25 @@ inputs:
   spec_path:
     description: Path to the test specification file.
     required: true
+  account_id:
+    description: New Relic account id used to test the integration
+    required: true
   license_key:
     description: New Relic license key used to test the integration
+    required: true
+  api_key:
+    description: New Relic api key used to test the integration
     required: true
   verbose:
     description: Verbose mode enabled
     required: false
-    default: false
+    default: "false"
 
 runs:
   using: "composite"
   steps:
     - id: run-spec
-      run: make -C ${{ github.action_path }} ROOT_DIR=${{ github.action_path }} LICENSE_KEY=${{ inputs.license_key }} ROOT_DIR=${{ github.workspace }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
+      run: make -C ${{ github.action_path }} ROOT_DIR=${{ github.action_path }} ACCOUNT_ID=${{ inputs.account_id }} API_KEY=${{ inputs.api_key }} LICENSE_KEY=${{ inputs.license_key }} SPEC_PATH=${{ inputs.spec_path }} VERBOSE=${{ inputs.verbose }} run
       shell: bash
 
 

@@ -2,14 +2,18 @@ package agent
 
 import (
 	_ "embed"
+	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"path/filepath"
+	"time"
 
-	"github.com/newrelic/newrelic-integration-e2e/internal/docker-compose"
-	"github.com/newrelic/newrelic-integration-e2e/pkg/settings"
-	"github.com/newrelic/newrelic-integration-e2e/pkg/spec"
+	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/dockercompose"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/oshelper"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 const (
@@ -20,12 +24,18 @@ const (
 	defConfigFile      = "nri-config.yml"
 	containerName      = "agent"
 	infraAgentDir      = "newrelic-infra-agent"
+	customTagKey       = "testKey"
+	scenarioTagRuneNr  = 10
 )
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
+
 type Agent interface {
-	SetUp(logger *logrus.Logger, scenario spec.Scenario) error
-	Launch() error
+	SetUp(scenario spec.Scenario) error
+	Run() error
 	Stop() error
+	GetCustomTagKey() string
+	GetCustomTagValue() string
 }
 
 type agent struct {
@@ -40,10 +50,14 @@ type agent struct {
 	dockerComposePath string
 	logger            *logrus.Logger
 	overrides         *spec.Agent
+	customTagKey      string
+	customTagValue    string
 }
 
-func NewAgent(settings settings.Settings) *agent {
+func NewAgent(settings e2e.Settings) *agent {
+	rand.Seed(time.Now().UnixNano())
 	agentDir := settings.AgentDir()
+
 	return &agent{
 		rootDir:           settings.RootDir(),
 		agentDir:          agentDir,
@@ -55,50 +69,61 @@ func NewAgent(settings settings.Settings) *agent {
 		licenseKey:        settings.LicenseKey(),
 		logger:            settings.Logger(),
 		overrides:         settings.Spec().AgentOverrides,
+		customTagKey:      customTagKey,
 	}
 }
 
 func (a *agent) initialize() error {
 	a.logger.Debug("removing temporary folders")
-	if err := removeDirectories(a.exportersDir, a.configsDir, a.binsDir); err != nil {
+	if err := oshelper.RemoveDirectories(a.exportersDir, a.configsDir, a.binsDir); err != nil {
 		return err
 	}
 	a.logger.Debug("creating folders required by the agent")
-	return makeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
+	return oshelper.MakeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
-func (a *agent) addIntegration(logger *logrus.Logger, integration spec.Integration) error {
+func (a *agent) addIntegration(integration spec.Integration) error {
 	if integration.BinaryPath == "" {
 		return nil
 	}
 	source := filepath.Join(a.rootDir, integration.BinaryPath)
 	destination := filepath.Join(a.binsDir, integration.Name)
-	logger.Debugf("copy file from '%s' to '%s'", source, destination)
-	return copyFile(source, destination)
+	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	return oshelper.CopyFile(source, destination)
 }
 
-func (a *agent) addPrometheusExporter(logger *logrus.Logger, integration spec.Integration) error {
+func (a *agent) addPrometheusExporter(integration spec.Integration) error {
 	if integration.ExporterBinaryPath == "" {
 		return nil
 	}
 	exporterName := filepath.Base(integration.ExporterBinaryPath)
 	source := filepath.Join(a.rootDir, integration.ExporterBinaryPath)
 	destination := filepath.Join(a.exportersDir, exporterName)
-	logger.Debugf("copy file from '%s' to '%s'", source, destination)
-	return copyFile(source, destination)
+	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
+	return oshelper.CopyFile(source, destination)
 }
 
-func (a *agent) addIntegrationsConfigFile(logger *logrus.Logger, integrations []spec.Integration) error {
-	content, err := yaml.Marshal(createAgentIntegrationModel(integrations))
+func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
+	content, err := yaml.Marshal(getIntegrationList(integrations))
 	if err != nil {
 		return err
 	}
 	cfgPath := filepath.Join(a.configsDir, defConfigFile)
-	logger.Debugf("create config file '%s' in  '%s'", defConfigFile, cfgPath)
+	a.logger.Debugf("create config file '%s' in  '%s'", defConfigFile, cfgPath)
 	return ioutil.WriteFile(cfgPath, content, 0777)
 }
 
-func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
+func (a *agent) generateScenarioTag() {
+	b := make([]rune, scenarioTagRuneNr)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+
+	a.customTagValue = string(b)
+}
+
+func (a *agent) SetUp(scenario spec.Scenario) error {
+	a.generateScenarioTag()
 	a.scenario = scenario
 	if err := a.initialize(); err != nil {
 		return err
@@ -108,34 +133,41 @@ func (a *agent) SetUp(logger *logrus.Logger, scenario spec.Scenario) error {
 	integrationsNames := make([]string, len(integrations))
 	for i := range integrations {
 		integration := integrations[i]
-		if err := a.addIntegration(logger, integration); err != nil {
+		if err := a.addIntegration(integration); err != nil {
 			return err
 		}
-		if err := a.addPrometheusExporter(logger, integration); err != nil {
+		if err := a.addPrometheusExporter(integration); err != nil {
 			return err
 		}
 		integrationsNames[i] = integration.Name
 	}
-	if err := a.addIntegrationsConfigFile(logger, integrations); err != nil {
+	if err := a.addIntegrationsConfigFile(integrations); err != nil {
 		return err
 	}
 	for k, v := range a.overrides.Integrations {
 		source := filepath.Join(a.rootDir, v)
 		destination := filepath.Join(a.binsDir, k)
-		return copyFile(source, destination)
+		return oshelper.CopyFile(source, destination)
 	}
 	return nil
 }
 
-func (a *agent) Launch() error {
-
-	return docker_compose.Run(a.dockerComposePath, containerName, map[string]string{
-		"NRIA_VERBOSE":     "1",
-		"NRIA_LICENSE_KEY": a.licenseKey,
+func (a *agent) Run() error {
+	return dockercompose.Run(a.dockerComposePath, containerName, map[string]string{
+		"NRIA_VERBOSE":           "1",
+		"NRIA_LICENSE_KEY":       a.licenseKey,
+		"NRIA_CUSTOM_ATTRIBUTES": fmt.Sprintf(`{"%s":"%s"}`, a.GetCustomTagKey(), a.GetCustomTagValue()),
 	})
 }
 
 func (a *agent) Stop() error {
+	return dockercompose.Down(a.dockerComposePath)
+}
 
-	return docker_compose.Down(a.dockerComposePath)
+func (a *agent) GetCustomTagKey() string {
+	return a.customTagKey
+}
+
+func (a *agent) GetCustomTagValue() string {
+	return a.customTagValue
 }
