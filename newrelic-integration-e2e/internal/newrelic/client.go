@@ -8,7 +8,7 @@ import (
 	"github.com/newrelic/newrelic-client-go/pkg/entities"
 )
 
-type DataClient interface {
+type Client interface {
 	FindEntityGUID(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error)
 	FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error)
 }
@@ -49,6 +49,10 @@ func (nrc *nrClient) FindEntityGUID(sample, metricName, customTagKey, entityTag 
 		return nil, fmt.Errorf("%w: %s", ErrNoResult, query)
 	}
 	firstResult := a.Results[0]
+	if firstResult["entity.guid"] == nil {
+		return nil, ErrNilGUID
+	}
+
 	guid := entities.EntityGUID(fmt.Sprintf("%+v", firstResult["entity.guid"]))
 	return &guid, nil
 }
