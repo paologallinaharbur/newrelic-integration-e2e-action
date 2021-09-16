@@ -9,6 +9,7 @@ import (
 	"time"
 
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/spec"
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/dockercompose"
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/oshelper"
 	"github.com/sirupsen/logrus"
@@ -30,7 +31,7 @@ const (
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 type Agent interface {
-	SetUp(scenario e2e.Scenario) error
+	SetUp(scenario spec.Scenario) error
 	Run() error
 	Stop() error
 	GetCustomTagKey() string
@@ -38,7 +39,7 @@ type Agent interface {
 }
 
 type agent struct {
-	scenario          e2e.Scenario
+	scenario          spec.Scenario
 	agentDir          string
 	configsDir        string
 	exportersDir      string
@@ -48,7 +49,7 @@ type agent struct {
 	rootDir           string
 	dockerComposePath string
 	logger            *logrus.Logger
-	overrides         *e2e.Agent
+	overrides         *spec.Agent
 	customTagKey      string
 	customTagValue    string
 }
@@ -81,7 +82,7 @@ func (a *agent) initialize() error {
 	return oshelper.MakeDirs(0777, a.exportersDir, a.configsDir, a.binsDir)
 }
 
-func (a *agent) addIntegration(integration e2e.Integration) error {
+func (a *agent) addIntegration(integration spec.Integration) error {
 	if integration.BinaryPath == "" {
 		return nil
 	}
@@ -91,7 +92,7 @@ func (a *agent) addIntegration(integration e2e.Integration) error {
 	return oshelper.CopyFile(source, destination)
 }
 
-func (a *agent) addPrometheusExporter(integration e2e.Integration) error {
+func (a *agent) addPrometheusExporter(integration spec.Integration) error {
 	if integration.ExporterBinaryPath == "" {
 		return nil
 	}
@@ -102,7 +103,7 @@ func (a *agent) addPrometheusExporter(integration e2e.Integration) error {
 	return oshelper.CopyFile(source, destination)
 }
 
-func (a *agent) addIntegrationsConfigFile(integrations []e2e.Integration) error {
+func (a *agent) addIntegrationsConfigFile(integrations []spec.Integration) error {
 	content, err := yaml.Marshal(getIntegrationList(integrations))
 	if err != nil {
 		return err
@@ -121,7 +122,7 @@ func (a *agent) generateScenarioTag() {
 	a.customTagValue = string(b)
 }
 
-func (a *agent) SetUp(scenario e2e.Scenario) error {
+func (a *agent) SetUp(scenario spec.Scenario) error {
 	a.generateScenarioTag()
 	a.scenario = scenario
 	if err := a.initialize(); err != nil {

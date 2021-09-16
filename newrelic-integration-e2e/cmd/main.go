@@ -5,11 +5,9 @@ import (
 	"flag"
 
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
-
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
-
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/executor"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
 	"github.com/sirupsen/logrus"
 )
 

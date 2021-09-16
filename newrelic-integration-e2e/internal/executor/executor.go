@@ -5,22 +5,19 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/retrier"
-
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
-
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/spec"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/pkg/retrier"
+	"github.com/sirupsen/logrus"
 )
 
 type Executor struct {
 	agent    agent.Agent
 	nrClient newrelic.DataClient
 	logger   *logrus.Logger
-	spec     *e2e.Definition
+	spec     *spec.Definition
 	rootDir  string
 }
 
@@ -83,7 +80,7 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 }
 
 // TODO Interface to specify it? needed?
-func (ex *Executor) executeTests(tests e2e.Tests) error {
+func (ex *Executor) executeTests(tests spec.Tests) error {
 	return retrier.Retry(ex.logger, 10, 60*time.Second, func() []error {
 		errors := ex.testEntities(tests.Entities)
 		errors = append(
@@ -98,7 +95,7 @@ func (ex *Executor) executeTests(tests e2e.Tests) error {
 	})
 }
 
-func (ex *Executor) testEntities(entities []e2e.Entity) []error {
+func (ex *Executor) testEntities(entities []spec.Entity) []error {
 	var errors []error
 	for _, en := range entities {
 		guid, err := ex.nrClient.FindEntityGUID(en.DataType, en.MetricName, ex.agent.GetCustomTagKey(), ex.agent.GetCustomTagValue())
@@ -120,12 +117,12 @@ func (ex *Executor) testEntities(entities []e2e.Entity) []error {
 	return errors
 }
 
-func (ex *Executor) testNRQLs(nrqls []e2e.NRQL) []error {
+func (ex *Executor) testNRQLs(nrqls []spec.NRQL) []error {
 	var errors []error
 	return errors
 }
 
-func (ex *Executor) testMetrics(metrics []e2e.Metrics) []error {
+func (ex *Executor) testMetrics(metrics []spec.Metrics) []error {
 	var errors []error
 	return errors
 }
