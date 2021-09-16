@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ParseSpecFile(t *testing.T) {
+func Test_ParseDefinitionFile(t *testing.T) {
 	var sample = `
 description: |
   End-to-end tests for PowerDNS integration
@@ -37,10 +37,9 @@ scenarios:
           metric_name: "powerdns_authoritative_up"
       metrics:
         - source: "powerdns.yml"
-          except:
-            - powerdns_authoritative_answers_bytes_total
-          additionals: ""`
-	spec, err := ParseSpecFile([]byte(sample))
+          except_metrics:
+            - powerdns_authoritative_answers_bytes_total`
+	spec, err := ParseDefinitionFile([]byte(sample))
 	assert.Nil(t, err)
 	assert.Equal(t, "End-to-end tests for PowerDNS integration\n", spec.Description)
 
@@ -67,18 +66,18 @@ scenarios:
 			Before: []string{"docker-compose -f deps/docker-compose.yml up -d"},
 			After:  []string{"docker-compose -f deps/docker-compose.yml down -v"},
 			Tests: Tests{
-				NRQLs: []NRQL{{Query: "a-query"}},
-				Entities: []Entity{
+				NRQLs: []TestNRQL{{Query: "a-query"}},
+				Entities: []TestEntity{
 					{
 						Type:       "POWERDNS_AUTHORITATIVE",
 						DataType:   "Metric",
 						MetricName: "powerdns_authoritative_up",
 					},
 				},
-				Metrics: []Metrics{
+				Metrics: []TestMetrics{
 					{
 						Source: "powerdns.yml",
-						Except: []string{"powerdns_authoritative_answers_bytes_total"},
+						ExceptMetrics: []string{"powerdns_authoritative_answers_bytes_total"},
 					},
 				},
 			},

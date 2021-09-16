@@ -2,6 +2,7 @@ package executor
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"time"
 
@@ -26,7 +27,7 @@ func NewExecutor(agent agent.Agent, nrClient newrelic.Client, settings e2e.Setti
 		agent:    agent,
 		nrClient: nrClient,
 		logger:   settings.Logger(),
-		spec:     settings.Spec(),
+		spec:     settings.SpecDefinition(),
 		rootDir:  settings.RootDir(),
 	}
 }
@@ -94,7 +95,7 @@ func (ex *Executor) executeTests(tests spec.Tests) error {
 	})
 }
 
-func (ex *Executor) testEntities(entities []spec.Entity) []error {
+func (ex *Executor) testEntities(entities []spec.TestEntity) []error {
 	var errors []error
 	for _, en := range entities {
 		guid, err := ex.nrClient.FindEntityGUID(en.DataType, en.MetricName, ex.agent.GetCustomTagKey(), ex.agent.GetCustomTagValue())
@@ -121,7 +122,22 @@ func (ex *Executor) testNRQLs(nrqls []spec.NRQL) []error {
 	return errors
 }
 
-func (ex *Executor) testMetrics(metrics []spec.Metrics) []error {
+func (ex *Executor) testMetrics(metrics []spec.TestMetrics) []error {
 	var errors []error
+	for _, m := range metrics {
+		content, err := ioutil.ReadFile(m.Source)
+		if err != nil {
+			errors = append(errors, fmt.Errorf("reading metrics source file: %w", err))
+			continue
+		}
+		ex.logger.Debug("parsing the content of the metrics source file")
+		_, err = spec.ParseMetricsFile(content)
+		if err != nil {
+			errors = append(errors, fmt.Errorf("unmarshaling metrics source file: %w", err))
+			continue
+		}
+		ex.logger.Debug("return with settings")
+
+	}
 	return errors
 }

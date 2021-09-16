@@ -45,22 +45,27 @@ type Integration struct {
 	Config             map[string]interface{} `yaml:"config"`
 }
 
-type Metrics struct {
-	Source    string   `yaml:"source"`
-	Including []string `yaml:"including"`
-	Except    []string `yaml:"except"`
+type TestMetrics struct {
+	Source string   `yaml:"source"`
+	Except []Except `yaml:"except"`
 }
+
+type Except struct {
+	Entities []string `yaml:"entities"`
+	Metrics  []string `yaml:"metrics"`
+}
+
 type Tests struct {
-	NRQLs    []NRQL    `yaml:"nrqls"`
-	Entities []Entity  `yaml:"entities"`
-	Metrics  []Metrics `yaml:"metrics"`
+	NRQLs    []NRQL        `yaml:"nrqls"`
+	Entities []TestEntity  `yaml:"entities"`
+	Metrics  []TestMetrics `yaml:"metrics"`
 }
 
 type NRQL struct {
 	Query string `yaml:"query"`
 }
 
-type Entity struct {
+type TestEntity struct {
 	Type       string `yaml:"type"`
 	DataType   string `yaml:"data_type"`
 	MetricName string `yaml:"metric_name"`
@@ -70,7 +75,7 @@ func (i *Integration) validate() error {
 	return nil
 }
 
-func ParseSpecFile(content []byte) (*Definition, error) {
+func ParseDefinitionFile(content []byte) (*Definition, error) {
 	specDefinition := &Definition{}
 	if err := yaml.Unmarshal(content, specDefinition); err != nil {
 		return nil, err

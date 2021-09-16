@@ -74,7 +74,7 @@ func main() {
 	logger := s.Logger()
 
 	logger.Debug("validating the spec definition")
-	if err := s.Spec().Validate(); err != nil {
+	if err := s.SpecDefinition().Validate(); err != nil {
 		logger.Fatalf("error validating the spec definition: %s", err)
 	}
 

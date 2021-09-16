@@ -70,7 +70,7 @@ func SettingsWithApiKey(apiKey string) SettingOption {
 
 type Settings interface {
 	Logger() *logrus.Logger
-	Spec() *spec.Definition
+	SpecDefinition() *spec.Definition
 	AgentDir() string
 	RootDir() string
 	LicenseKey() string
@@ -80,7 +80,7 @@ type Settings interface {
 
 type settings struct {
 	logger        *logrus.Logger
-	spec          *spec.Definition
+	specDefinition *spec.Definition
 	specParentDir string
 	rootDir       string
 	agentDir      string
@@ -97,8 +97,8 @@ func (s *settings) LicenseKey() string {
 	return s.licenseKey
 }
 
-func (s *settings) Spec() *spec.Definition {
-	return s.spec
+func (s *settings) SpecDefinition() *spec.Definition {
+	return s.specDefinition
 }
 
 func (s *settings) AgentDir() string {
@@ -134,14 +134,14 @@ func NewSettings(
 		return nil, err
 	}
 	logger.Debug("parsing the content of the spec file")
-	s, err := spec.ParseSpecFile(content)
+	s, err := spec.ParseDefinitionFile(content)
 	if err != nil {
 		return nil, err
 	}
 	logger.Debug("return with settings")
 	return &settings{
 		logger:        logger,
-		spec:          s,
+		specDefinition: s,
 		agentDir:      options.agentDir,
 		specParentDir: options.specParentDir,
 		rootDir:       options.rootDir,
