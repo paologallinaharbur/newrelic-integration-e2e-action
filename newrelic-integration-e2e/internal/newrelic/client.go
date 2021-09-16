@@ -73,3 +73,18 @@ func (nrc *nrClient) FindEntityByGUID(guid *entities.EntityGUID) (entities.Entit
 
 	return *entity, nil
 }
+
+func (nrc *nrClient) FindEntityMetrics(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error) {
+	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where %s = '%s' limit 1", sample, metricName, customTagKey, entityTag)
+
+	a, err := nrc.client.Query(nrc.accountID, query)
+	if err != nil {
+		return nil, fmt.Errorf("executing query to fetch entity GUID %s, %w", query, err)
+	}
+	if len(a.Results) == 0 {
+		return nil, fmt.Errorf("%w: %s", ErrNoResult, query)
+	}
+	firstResult := a.Results[0]
+	guid := entities.EntityGUID(fmt.Sprintf("%+v", firstResult["entity.guid"]))
+	return &guid, nil
+}

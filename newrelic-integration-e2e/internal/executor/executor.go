@@ -110,14 +110,14 @@ func (ex *Executor) testEntities(entities []spec.TestEntity) []error {
 		}
 
 		if entity.GetType() != en.Type {
-			errors = append(errors, fmt.Errorf("enttiy type is not matching: %s!=%s", entity.GetType(), en.Type))
+			errors = append(errors, fmt.Errorf("entity type is not matching: %s!=%s", entity.GetType(), en.Type))
 			continue
 		}
 	}
 	return errors
 }
 
-func (ex *Executor) testNRQLs(nrqls []spec.NRQL) []error {
+func (ex *Executor) testNRQLs(nrqls []spec.TestNRQL) []error {
 	var errors []error
 	return errors
 }

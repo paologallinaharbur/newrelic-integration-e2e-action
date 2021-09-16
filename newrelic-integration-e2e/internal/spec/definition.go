@@ -45,23 +45,13 @@ type Integration struct {
 	Config             map[string]interface{} `yaml:"config"`
 }
 
-type TestMetrics struct {
-	Source string   `yaml:"source"`
-	Except []Except `yaml:"except"`
-}
-
-type Except struct {
-	Entities []string `yaml:"entities"`
-	Metrics  []string `yaml:"metrics"`
-}
-
 type Tests struct {
-	NRQLs    []NRQL        `yaml:"nrqls"`
+	NRQLs    []TestNRQL    `yaml:"nrqls"`
 	Entities []TestEntity  `yaml:"entities"`
 	Metrics  []TestMetrics `yaml:"metrics"`
 }
 
-type NRQL struct {
+type TestNRQL struct {
 	Query string `yaml:"query"`
 }
 
@@ -69,6 +59,12 @@ type TestEntity struct {
 	Type       string `yaml:"type"`
 	DataType   string `yaml:"data_type"`
 	MetricName string `yaml:"metric_name"`
+}
+
+type TestMetrics struct {
+	Source         string   `yaml:"source"`
+	ExceptEntities []string `yaml:"except_entities"`
+	ExceptMetrics  []string `yaml:"except_metrics"`
 }
 
 func (i *Integration) validate() error {

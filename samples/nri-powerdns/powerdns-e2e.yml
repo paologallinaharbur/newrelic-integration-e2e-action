@@ -92,9 +92,9 @@ scenarios:
           metric_name: "powerdns_recursor_up"
       metrics:
         - source: "powerdns.yml"
-          except:
-            entities: []
-            metrics:
-              - powerdns_authoritative_answers_bytes_total
-              - powerdns_recursor_cache_lookups_total
+          except_entities:
+            - POWERDNS_AUTHORITATIVE
+          except_metrics:
+            - powerdns_authoritative_answers_bytes_total
+            - powerdns_recursor_cache_lookups_total
           # additionals: ""
