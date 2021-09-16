@@ -15,13 +15,13 @@ import (
 
 type Executor struct {
 	agent    agent.Agent
-	nrClient newrelic.DataClient
+	nrClient newrelic.Client
 	logger   *logrus.Logger
 	spec     *spec.Definition
 	rootDir  string
 }
 
-func NewExecutor(agent agent.Agent, nrClient newrelic.DataClient, settings e2e.Settings) *Executor {
+func NewExecutor(agent agent.Agent, nrClient newrelic.Client, settings e2e.Settings) *Executor {
 	return &Executor{
 		agent:    agent,
 		nrClient: nrClient,
@@ -79,7 +79,6 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 	return nil
 }
 
-// TODO Interface to specify it? needed?
 func (ex *Executor) executeTests(tests spec.Tests) error {
 	return retrier.Retry(ex.logger, 10, 60*time.Second, func() []error {
 		errors := ex.testEntities(tests.Entities)
