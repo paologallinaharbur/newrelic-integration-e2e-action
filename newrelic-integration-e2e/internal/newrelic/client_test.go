@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	entityGUID            = "Mjc2Mjk0NXxJTkZSQXxOQXwtMzAzMjA2ODg0MjM5NDA1Nzg1OQ"
+	entityGUIDA           = "Mjc2Mjk0NXxJTkZSQXxOQXwtMzAzMjA2ODg0MjM5NDA1Nzg1OQ"
+	entityGUIDB           = "Axz2Mjk0NXxJTkZSQXxOQXwtMzAzMjA2ODg0MjM5NDA1Nzg1OQ"
 	sample                = "Metric"
 	customTagKey          = "testKey"
 	entityTag             = "uuuuxxx"
@@ -59,7 +60,7 @@ func (a apiClientMock) Query(_ int, query string) (*nrdb.NRDBResultContainer, er
 		Results: []nrdb.NRDBResult{
 			map[string]interface{}{
 				"newrelic.agentVersion": "1.20.2",
-				"entity.guid":           entityGUID,
+				"entity.guid":           entityGUIDA,
 				"testKey":               "gyzsteszda",
 			},
 		},
@@ -67,12 +68,21 @@ func (a apiClientMock) Query(_ int, query string) (*nrdb.NRDBResultContainer, er
 }
 
 func (a apiClientMock) GetEntity(guid *entities.EntityGUID) (*entities.EntityInterface, error) {
+	uncorrectEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUIDA))
+	nilEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUIDB))
+	switch *guid {
+	case uncorrectEntity:
+		return nil, randomError
+	case nilEntity:
+		return nil, nil
+	}
+
 	entity := entities.EntityInterface(&entities.GenericInfrastructureEntity{})
 	return &entity, nil
 }
 
 func TestNrClient_FindEntityGUID(t *testing.T) {
-	correctEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUID))
+	correctEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUIDA))
 
 	tests := []struct {
 		name          string
@@ -119,5 +129,49 @@ func TestNrClient_FindEntityGUID(t *testing.T) {
 }
 
 func TestNrClient_FindEntityByGUID(t *testing.T) {
-	t.Skipped()
+	unCorrectEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUIDA))
+	nilEntity := entities.EntityGUID(fmt.Sprintf("%+v", entityGUIDB))
+	someRandomCorrectEntity := entities.EntityGUID(fmt.Sprintf("%+v", "a-guid"))
+
+	tests := []struct {
+		name          string
+		entityGUID    *entities.EntityGUID
+		errorExpected error
+	}{
+		{
+			name:          "when the GUID is nil it should return ErrNilGUID",
+			entityGUID:    nil,
+			errorExpected: ErrNilGUID,
+		},
+		{
+			name:          "when the client call returns an error it should return it",
+			entityGUID:    &unCorrectEntity,
+			errorExpected: randomError,
+		},
+		{
+			name:          "when the client returns a nil entity it should return ErrNilEntity",
+			entityGUID:    &nilEntity,
+			errorExpected: ErrNilEntity,
+		},
+		{
+			name:          "when the client returns a correct entity it should return it",
+			entityGUID:    &someRandomCorrectEntity,
+			errorExpected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			nrClient := nrClient{
+				client: apiClientMock{},
+			}
+			guid, err := nrClient.FindEntityByGUID(tt.entityGUID)
+			if !errors.Is(err, tt.errorExpected) {
+				t.Errorf("Error returned is not: %w", tt.errorExpected)
+			}
+			if tt.errorExpected == nil && guid == nil {
+				t.Errorf("Expected entity, got nil")
+			}
+		})
+	}
 }
