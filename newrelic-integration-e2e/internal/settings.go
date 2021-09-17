@@ -82,6 +82,7 @@ type settings struct {
 	logger        *logrus.Logger
 	spec          *spec.Definition
 	specParentDir string
+	rootDir       string
 	agentDir      string
 	licenseKey    string
 	accountID     int
@@ -105,6 +106,9 @@ func (s *settings) AgentDir() string {
 }
 
 func (s *settings) RootDir() string {
+	if s.rootDir != "" {
+		return s.rootDir
+	}
 	return s.specParentDir
 }
 
@@ -140,6 +144,7 @@ func NewSettings(
 		spec:          s,
 		agentDir:      options.agentDir,
 		specParentDir: options.specParentDir,
+		rootDir:       options.rootDir,
 		licenseKey:    options.licenseKey,
 		apiKey:        options.apiKey,
 		accountID:     options.accountID,
