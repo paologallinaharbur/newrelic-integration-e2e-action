@@ -33,7 +33,7 @@ func TestAgent_SetUp(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	t.Run("Given a scenario with 1 integration, the correct files should be in the AgentDir", func(t *testing.T) {
+	t.Run("Given a scenario with 1 integration, the correct files should be in the AgentDir the customTagKey generated", func(t *testing.T) {
 		sut := NewAgent(settings)
 		require.NotEmpty(t, sut)
 
@@ -54,5 +54,8 @@ func TestAgent_SetUp(t *testing.T) {
 		configFiles, err := ioutil.ReadDir(filepath.Join(agentDir, infraAgentDir, integrationsCfgDir))
 		require.NoError(t, err)
 		require.Equal(t, 1, len(configFiles))
+
+		// scenario tag generated
+		require.NotEmpty(t, sut.customTagValue)
 	})
 }
