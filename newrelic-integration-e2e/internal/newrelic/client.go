@@ -11,6 +11,7 @@ import (
 type Client interface {
 	FindEntityGUID(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error)
 	FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error)
+	FindEntityMetrics()
 }
 
 var (
@@ -74,8 +75,9 @@ func (nrc *nrClient) FindEntityByGUID(guid *entities.EntityGUID) (entities.Entit
 	return *entity, nil
 }
 
-func (nrc *nrClient) FindEntityMetrics(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error) {
-	query := fmt.Sprintf("SELECT * from %s where metricName = '%s' where %s = '%s' limit 1", sample, metricName, customTagKey, entityTag)
+func (nrc *nrClient) FindEntityMetrics(sample, metricName, customTagKey, entityTag string) ([]string, error) {
+
+	query := fmt.Sprintf("SELECT keyset() from %s where metricName = '%s' where %s = '%s' limit 1", sample, metricName, customTagKey, entityTag)
 
 	a, err := nrc.client.Query(nrc.accountID, query)
 	if err != nil {

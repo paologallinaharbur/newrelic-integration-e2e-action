@@ -123,20 +123,34 @@ func (ex *Executor) testNRQLs(nrqls []spec.TestNRQL) []error {
 	return errors
 }
 
-func (ex *Executor) testMetrics(metrics []spec.TestMetrics) []error {
+func (ex *Executor) testMetrics(testMetrics []spec.TestMetrics) []error {
 	var errors []error
-	for _, m := range metrics {
-		content, err := ioutil.ReadFile(filepath.Join(ex.specParentDir, m.Source))
+	for _, tm := range testMetrics {
+		content, err := ioutil.ReadFile(filepath.Join(ex.specParentDir, tm.Source))
 		if err != nil {
 			errors = append(errors, fmt.Errorf("reading metrics source file: %w", err))
 			continue
 		}
 		ex.logger.Debug("parsing the content of the metrics source file")
-		_, err = spec.ParseMetricsFile(content)
+		metrics, err := spec.ParseMetricsFile(content)
 		if err != nil {
 			errors = append(errors, fmt.Errorf("unmarshaling metrics source file: %w", err))
 			continue
 		}
+
+		for _, entitiy := range metrics.Entities {
+			if entitiy.EntityType
+		}
+
+		tm.ExceptEntities
+
+		metrics.Entities[0].EntityType
+
+		// call FindEntityMetrics
+
+
+
+
 		ex.logger.Debug("return with settings")
 
 	}
