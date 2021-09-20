@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
@@ -15,20 +16,20 @@ import (
 )
 
 type Executor struct {
-	agent    agent.Agent
-	nrClient newrelic.Client
-	logger   *logrus.Logger
-	spec     *spec.Definition
-	rootDir  string
+	agent         agent.Agent
+	nrClient      newrelic.Client
+	logger        *logrus.Logger
+	spec          *spec.Definition
+	specParentDir string
 }
 
 func NewExecutor(agent agent.Agent, nrClient newrelic.Client, settings e2e.Settings) *Executor {
 	return &Executor{
-		agent:    agent,
-		nrClient: nrClient,
-		logger:   settings.Logger(),
-		spec:     settings.SpecDefinition(),
-		rootDir:  settings.RootDir(),
+		agent:         agent,
+		nrClient:      nrClient,
+		logger:        settings.Logger(),
+		spec:          settings.SpecDefinition(),
+		specParentDir: settings.SpecParentDir(),
 	}
 }
 
@@ -38,7 +39,7 @@ func (ex *Executor) Exec() error {
 		if err := ex.agent.SetUp(scenario); err != nil {
 			return err
 		}
-		ex.logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description)
+		ex.logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description, ex.agent.GetCustomTagValue())
 
 		if err := ex.executeOSCommands(scenario.Before); err != nil {
 			return err
@@ -68,9 +69,9 @@ func (ex *Executor) Exec() error {
 
 func (ex *Executor) executeOSCommands(statements []string) error {
 	for _, stmt := range statements {
-		ex.logger.Debugf("execute command '%s' from path '%s'", stmt, ex.rootDir)
+		ex.logger.Debugf("execute command '%s' from path '%s'", stmt, ex.specParentDir)
 		cmd := exec.Command("bash", "-c", stmt)
-		cmd.Dir = ex.rootDir
+		cmd.Dir = ex.specParentDir
 		stdout, err := cmd.Output()
 		logrus.Debug(stdout)
 		if err != nil {
@@ -125,7 +126,7 @@ func (ex *Executor) testNRQLs(nrqls []spec.TestNRQL) []error {
 func (ex *Executor) testMetrics(metrics []spec.TestMetrics) []error {
 	var errors []error
 	for _, m := range metrics {
-		content, err := ioutil.ReadFile(m.Source)
+		content, err := ioutil.ReadFile(filepath.Join(ex.specParentDir, m.Source))
 		if err != nil {
 			errors = append(errors, fmt.Errorf("reading metrics source file: %w", err))
 			continue

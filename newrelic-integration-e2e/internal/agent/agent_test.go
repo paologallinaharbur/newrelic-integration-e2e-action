@@ -24,9 +24,11 @@ func TestAgent_SetUp(t *testing.T) {
 	require.NoError(t, err)
 	_, err = os.Create(filepath.Join(rootDir, "/nri-prometheus"))
 	require.NoError(t, err)
+	err = oshelper.CopyFile("testdata/spec_file.yml", filepath.Join(rootDir, "spec_file.yml"))
+	require.NoError(t, err)
 
 	settings, err := e2e.NewSettings(
-		e2e.SettingsWithSpecPath("testdata/spec_file.yml"),
+		e2e.SettingsWithSpecPath(filepath.Join(rootDir, "spec_file.yml")),
 		e2e.SettingsWithAgentDir(agentDir),
 		e2e.SettingsWithRootDir(rootDir),
 	)
@@ -36,7 +38,7 @@ func TestAgent_SetUp(t *testing.T) {
 		sut := NewAgent(settings)
 		require.NotEmpty(t, sut)
 
-		err := sut.SetUp(settings.Spec().Scenarios[0])
+		err := sut.SetUp(settings.SpecDefinition().Scenarios[0])
 		require.NoError(t, err)
 
 		// nri-integration and exporter

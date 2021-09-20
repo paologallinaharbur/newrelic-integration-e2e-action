@@ -73,20 +73,21 @@ type Settings interface {
 	SpecDefinition() *spec.Definition
 	AgentDir() string
 	RootDir() string
+	SpecParentDir() string
 	LicenseKey() string
 	ApiKey() string
 	AccountID() int
 }
 
 type settings struct {
-	logger        *logrus.Logger
+	logger         *logrus.Logger
 	specDefinition *spec.Definition
-	specParentDir string
-	rootDir       string
-	agentDir      string
-	licenseKey    string
-	accountID     int
-	apiKey        string
+	specParentDir  string
+	rootDir        string
+	agentDir       string
+	licenseKey     string
+	accountID      int
+	apiKey         string
 }
 
 func (s *settings) Logger() *logrus.Logger {
@@ -106,9 +107,10 @@ func (s *settings) AgentDir() string {
 }
 
 func (s *settings) RootDir() string {
-	if s.rootDir != "" {
-		return s.rootDir
-	}
+	return s.rootDir
+}
+
+func (s *settings) SpecParentDir() string {
 	return s.specParentDir
 }
 
@@ -140,13 +142,13 @@ func NewSettings(
 	}
 	logger.Debug("return with settings")
 	return &settings{
-		logger:        logger,
+		logger:         logger,
 		specDefinition: s,
-		agentDir:      options.agentDir,
-		specParentDir: options.specParentDir,
-		rootDir:       options.rootDir,
-		licenseKey:    options.licenseKey,
-		apiKey:        options.apiKey,
-		accountID:     options.accountID,
+		agentDir:       options.agentDir,
+		specParentDir:  options.specParentDir,
+		rootDir:        options.rootDir,
+		licenseKey:     options.licenseKey,
+		apiKey:         options.apiKey,
+		accountID:      options.accountID,
 	}, nil
 }
