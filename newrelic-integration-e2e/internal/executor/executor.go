@@ -15,6 +15,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const dmTableName = "Metric"
+
 type Executor struct {
 	agent         agent.Agent
 	nrClient      newrelic.Client
@@ -115,6 +117,7 @@ func (ex *Executor) testEntities(entities []spec.TestEntity) []error {
 			continue
 		}
 	}
+	ex.logger.Debug("Test Entities complete")
 	return errors
 }
 
@@ -138,21 +141,58 @@ func (ex *Executor) testMetrics(testMetrics []spec.TestMetrics) []error {
 			continue
 		}
 
-		for _, entitiy := range metrics.Entities {
-			if entitiy.EntityType
+		queriedMetrics, err := ex.nrClient.FindEntityMetrics(dmTableName, ex.agent.GetCustomTagKey(), ex.agent.GetCustomTagValue())
+		if err != nil {
+			errors = append(errors, fmt.Errorf("finding keyset: %w", err))
+			continue
 		}
 
-		tm.ExceptEntities
+		for _, entity := range metrics.Entities {
+			if isEntityException(entity.EntityType, tm.ExceptEntities) {
+				continue
+			}
 
-		metrics.Entities[0].EntityType
+			for _, metric := range entity.Metrics {
+				if isMetricException(metric.Name, tm.ExceptMetrics) {
+					continue
+				}
 
-		// call FindEntityMetrics
-
-
-
-
-		ex.logger.Debug("return with settings")
-
+				if containsMetric(metric.Name, queriedMetrics) {
+					continue
+				} else {
+					errors = append(errors, fmt.Errorf("finding Metric: %v", metric.Name))
+					continue
+				}
+			}
+		}
 	}
+	ex.logger.Debug("Test Metrics complete")
 	return errors
+}
+
+func isEntityException(entity string, entitiesList []string) bool {
+  for _, entityType := range entitiesList {
+	  if entityType == entity {
+		  return true
+	  }
+  }
+	return false
+}
+
+func isMetricException(metric string, exceptionMetricsList []string) bool {
+	for _, exceptMetric := range exceptionMetricsList {
+		if exceptMetric == metric {
+			return true
+		}
+	}
+	return false
+}
+
+func containsMetric(metric string, queriedMetricsList []string) bool {
+	for _, queriedMetric := range queriedMetricsList {
+		if queriedMetric == metric {
+			return true
+		}
+	}
+	return false
 }

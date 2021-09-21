@@ -94,6 +94,7 @@ scenarios:
         - source: "powerdns.yml"
           except_entities:
             - POWERDNS_AUTHORITATIVE
+            # - POWERDNS_RECURSOR
           except_metrics:
             - powerdns_authoritative_answers_bytes_total
             - powerdns_recursor_cache_lookups_total

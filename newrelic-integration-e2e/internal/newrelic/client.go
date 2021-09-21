@@ -3,6 +3,7 @@ package newrelic
 import (
 	"errors"
 	"fmt"
+	"github.com/newrelic/newrelic-client-go/pkg/nrdb"
 	"log"
 
 	"github.com/newrelic/newrelic-client-go/pkg/entities"
@@ -11,13 +12,13 @@ import (
 type Client interface {
 	FindEntityGUID(sample, metricName, customTagKey, entityTag string) (*entities.EntityGUID, error)
 	FindEntityByGUID(guid *entities.EntityGUID) (entities.EntityInterface, error)
-	FindEntityMetrics()
+	FindEntityMetrics(sample, customTagKey, entityTag string) ([]string, error)
 }
 
 var (
 	ErrNilEntity = errors.New("nil entity, impossible to dereference")
 	ErrNilGUID   = errors.New("GUID is nil, impossible to find entity")
-	ErrNoResult  = errors.New("query to fetch entity GUID did not return any result")
+	ErrNoResult  = errors.New("query did not return any result")
 )
 
 type nrClient struct {
@@ -75,18 +76,24 @@ func (nrc *nrClient) FindEntityByGUID(guid *entities.EntityGUID) (entities.Entit
 	return *entity, nil
 }
 
-func (nrc *nrClient) FindEntityMetrics(sample, metricName, customTagKey, entityTag string) ([]string, error) {
-
-	query := fmt.Sprintf("SELECT keyset() from %s where metricName = '%s' where %s = '%s' limit 1", sample, metricName, customTagKey, entityTag)
+func (nrc *nrClient) FindEntityMetrics(sample, customTagKey, entityTag string) ([]string, error) {
+	query := fmt.Sprintf("SELECT keyset() from %s where %s = '%s' limit 1", sample, customTagKey, entityTag)
 
 	a, err := nrc.client.Query(nrc.accountID, query)
 	if err != nil {
-		return nil, fmt.Errorf("executing query to fetch entity GUID %s, %w", query, err)
+		return nil, fmt.Errorf("executing query to keyset %s, %w", query, err)
 	}
 	if len(a.Results) == 0 {
 		return nil, fmt.Errorf("%w: %s", ErrNoResult, query)
 	}
-	firstResult := a.Results[0]
-	guid := entities.EntityGUID(fmt.Sprintf("%+v", firstResult["entity.guid"]))
-	return &guid, nil
+
+	return resultMetrics(a.Results), nil
+}
+
+func resultMetrics(queryResults []nrdb.NRDBResult) []string {
+	result := make([]string, len(queryResults))
+	for _, r := range queryResults {
+		result = append(result, fmt.Sprintf("%+v", r["key"]))
+	}
+	return result
 }
