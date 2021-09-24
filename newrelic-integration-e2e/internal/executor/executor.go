@@ -86,14 +86,16 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 func (ex *Executor) executeTests(tests spec.Tests) error {
 	return retrier.Retry(ex.logger, 10, 60*time.Second, func() []error {
 		errors := ex.testEntities(tests.Entities)
-		errors = append(
-			errors,
-			ex.testNRQLs(tests.NRQLs)...,
-		)
-		errors = append(
-			errors,
-			ex.testMetrics(tests.Metrics)...,
-		)
+		if len(errors) == 0 {
+			errors = append(
+				errors,
+				ex.testNRQLs(tests.NRQLs)...,
+			)
+			errors = append(
+				errors,
+				ex.testMetrics(tests.Metrics)...,
+			)
+		}
 		return errors
 	})
 }
@@ -117,12 +119,18 @@ func (ex *Executor) testEntities(entities []spec.TestEntity) []error {
 			continue
 		}
 	}
-	ex.logger.Debug("Test Entities complete")
 	return errors
 }
 
 func (ex *Executor) testNRQLs(nrqls []spec.TestNRQL) []error {
 	var errors []error
+	for _, nrql := range nrqls {
+		err := ex.nrClient.NRQLQuery(nrql.Query, ex.agent.GetCustomTagKey(), ex.agent.GetCustomTagValue())
+		if err != nil {
+			errors = append(errors, fmt.Errorf("querying: %w", err))
+			continue
+		}
+	}
 	return errors
 }
 
@@ -166,16 +174,15 @@ func (ex *Executor) testMetrics(testMetrics []spec.TestMetrics) []error {
 			}
 		}
 	}
-	ex.logger.Debug("Test Metrics complete")
 	return errors
 }
 
 func isEntityException(entity string, entitiesList []string) bool {
-  for _, entityType := range entitiesList {
-	  if entityType == entity {
-		  return true
-	  }
-  }
+	for _, entityType := range entitiesList {
+		if entityType == entity {
+			return true
+		}
+	}
 	return false
 }
 
