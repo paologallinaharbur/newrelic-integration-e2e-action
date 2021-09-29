@@ -161,7 +161,7 @@ func (a *agent) Run() error {
 }
 
 func (a *agent) Stop() error {
-	return dockercompose.Down(a.dockerComposePath)
+	return dockercompose.Down(a.dockerComposePath, containerName)
 }
 
 func (a *agent) GetCustomTagKey() string {
