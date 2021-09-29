@@ -5,8 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -29,11 +27,7 @@ func Run(path string, container string, envVars map[string]string) error {
 	return cmd.Run()
 }
 
-func Down(path, containerName string) error {
-	containerID, err := getContainerID(path, containerName)
-	if err == nil {
-		Logs(containerID)
-	}
+func Down(path string) error {
 	args := []string{"-f", path, "down", "-v"}
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
@@ -42,7 +36,7 @@ func Down(path, containerName string) error {
 	return cmd.Run()
 }
 
-func Build(path string, container string) error {
+func Build(path, container string) error {
 	args := []string{"-f", path, "build", "--no-cache", container}
 	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerComposeBin, args...)
@@ -51,22 +45,25 @@ func Build(path string, container string) error {
 	return cmd.Run()
 }
 
-func Logs(containerID string) error {
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.Debugf("cntid: %s", containerID)
+func Logs(path, containerName string) string {
+	containerID := getContainerID(path, containerName)
+
 	args := []string{"logs", containerID}
-	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerBin, args...)
 	stdout, err := cmd.Output()
-	logrus.Debug("stdout")
-	logrus.Debug(string(stdout))
-	logrus.Debug(err)
-	return err
+	if ee, ok := err.(*exec.ExitError); ok {
+		fmt.Print(string(ee.Stderr))
+	}
+	return string(stdout)
 }
 
-func getContainerID(path, containerName string) (string, error) {
+func getContainerID(path, containerName string) string {
+	const shortContainerIDLength = 12
 	args := []string{"-f", path, "ps", "-q", containerName}
 	cmd := exec.Command(dockerComposeBin, args...)
-	containerID, err := cmd.Output()
-	return string(containerID), err
+	containerID, _ := cmd.Output()
+	if len(containerID) > shortContainerIDLength {
+		return string(containerID)[:shortContainerIDLength]
+	}
+	return string(containerID)
 }

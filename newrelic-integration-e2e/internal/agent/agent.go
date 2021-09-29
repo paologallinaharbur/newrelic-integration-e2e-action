@@ -161,7 +161,10 @@ func (a *agent) Run() error {
 }
 
 func (a *agent) Stop() error {
-	return dockercompose.Down(a.dockerComposePath, containerName)
+	if a.logger.GetLevel() == logrus.DebugLevel {
+		logrus.Debug(dockercompose.Logs(a.dockerComposePath, containerName))
+	}
+	return dockercompose.Down(a.dockerComposePath)
 }
 
 func (a *agent) GetCustomTagKey() string {
