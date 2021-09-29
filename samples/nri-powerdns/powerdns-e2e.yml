@@ -82,7 +82,7 @@ scenarios:
           api_key: recursor-secret
     tests:
       nrqls:
-        - query: ""
+        - query: "SELECT average(powerdns_authoritative_queries_total2) FROM Metric"
       entities:
         - type: "POWERDNS_AUTHORITATIVE"
           data_type: "Metric"
@@ -92,7 +92,9 @@ scenarios:
           metric_name: "powerdns_recursor_up"
       metrics:
         - source: "powerdns.yml"
-          except:
+          except_entities:
+            - POWERDNS_AUTHORITATIVE
+          except_metrics:
             - powerdns_authoritative_answers_bytes_total
             - powerdns_recursor_cache_lookups_total
-          additionals: ""
+          # additionals: ""

@@ -46,7 +46,7 @@ type agent struct {
 	binsDir           string
 	licenseKey        string
 	defConfigFile     string
-	rootDir           string
+	specParentDir     string
 	dockerComposePath string
 	logger            *logrus.Logger
 	overrides         *spec.Agent
@@ -59,7 +59,7 @@ func NewAgent(settings e2e.Settings) *agent {
 	agentDir := settings.AgentDir()
 
 	return &agent{
-		rootDir:           settings.RootDir(),
+		specParentDir:     settings.SpecParentDir(),
 		agentDir:          agentDir,
 		configsDir:        filepath.Join(agentDir, infraAgentDir, integrationsCfgDir),
 		exportersDir:      filepath.Join(agentDir, infraAgentDir, exportersDir),
@@ -68,7 +68,7 @@ func NewAgent(settings e2e.Settings) *agent {
 		dockerComposePath: filepath.Join(agentDir, dockerCompose),
 		licenseKey:        settings.LicenseKey(),
 		logger:            settings.Logger(),
-		overrides:         settings.Spec().AgentOverrides,
+		overrides:         settings.SpecDefinition().AgentOverrides,
 		customTagKey:      customTagKey,
 	}
 }
@@ -86,7 +86,7 @@ func (a *agent) addIntegration(integration spec.Integration) error {
 	if integration.BinaryPath == "" {
 		return nil
 	}
-	source := filepath.Join(a.rootDir, integration.BinaryPath)
+	source := filepath.Join(a.specParentDir, integration.BinaryPath)
 	destination := filepath.Join(a.binsDir, integration.Name)
 	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
 	return oshelper.CopyFile(source, destination)
@@ -97,7 +97,7 @@ func (a *agent) addPrometheusExporter(integration spec.Integration) error {
 		return nil
 	}
 	exporterName := filepath.Base(integration.ExporterBinaryPath)
-	source := filepath.Join(a.rootDir, integration.ExporterBinaryPath)
+	source := filepath.Join(a.specParentDir, integration.ExporterBinaryPath)
 	destination := filepath.Join(a.exportersDir, exporterName)
 	a.logger.Debugf("copy file from '%s' to '%s'", source, destination)
 	return oshelper.CopyFile(source, destination)
@@ -145,7 +145,7 @@ func (a *agent) SetUp(scenario spec.Scenario) error {
 		return err
 	}
 	for k, v := range a.overrides.Integrations {
-		source := filepath.Join(a.rootDir, v)
+		source := filepath.Join(a.specParentDir, v)
 		destination := filepath.Join(a.binsDir, k)
 		return oshelper.CopyFile(source, destination)
 	}
