@@ -162,7 +162,7 @@ func (a *agent) Run() error {
 
 func (a *agent) Stop() error {
 	if a.logger.GetLevel() == logrus.DebugLevel {
-		logrus.Debug(dockercompose.Logs(a.dockerComposePath, containerName))
+		a.logger.Debug(dockercompose.Logs(a.dockerComposePath, containerName))
 	}
 	return dockercompose.Down(a.dockerComposePath)
 }
