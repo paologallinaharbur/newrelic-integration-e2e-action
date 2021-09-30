@@ -1,6 +1,6 @@
 # Variables
 SPEC_PATH ?= samples/nri-powerdns/powerdns-e2e.yml
-VERBOSE ?= true
+VERBOSE ?= false
 
 all: validate test
 

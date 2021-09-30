@@ -5,12 +5,11 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/sirupsen/logrus"
 )
 
 const (
 	dockerComposeBin = "docker-compose"
+	dockerBin        = "docker"
 )
 
 func Run(path string, container string, envVars map[string]string) error {
@@ -29,7 +28,6 @@ func Run(path string, container string, envVars map[string]string) error {
 }
 
 func Down(path string) error {
-	Logs(path)
 	args := []string{"-f", path, "down", "-v"}
 	cmd := exec.Command(dockerComposeBin, args...)
 	cmd.Stdout = os.Stdout
@@ -38,7 +36,7 @@ func Down(path string) error {
 	return cmd.Run()
 }
 
-func Build(path string, container string) error {
+func Build(path, container string) error {
 	args := []string{"-f", path, "build", "--no-cache", container}
 	fmt.Println(strings.Join(args, " "))
 	cmd := exec.Command(dockerComposeBin, args...)
@@ -47,13 +45,25 @@ func Build(path string, container string) error {
 	return cmd.Run()
 }
 
-func Logs(path string) error {
-	args := []string{"-f", path, "logs"}
-	fmt.Println(strings.Join(args, " "))
-	cmd := exec.Command(dockerComposeBin, args...)
+func Logs(path, containerName string) string {
+	containerID := getContainerID(path, containerName)
+
+	args := []string{"logs", containerID}
+	cmd := exec.Command(dockerBin, args...)
 	stdout, err := cmd.Output()
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.Debug("stdout")
-	logrus.Debug(string(stdout))
-	return err
+	if ee, ok := err.(*exec.ExitError); ok {
+		fmt.Print(string(ee.Stderr))
+	}
+	return string(stdout)
+}
+
+func getContainerID(path, containerName string) string {
+	const shortContainerIDLength = 12
+	args := []string{"-f", path, "ps", "-q", containerName}
+	cmd := exec.Command(dockerComposeBin, args...)
+	containerID, _ := cmd.Output()
+	if len(containerID) > shortContainerIDLength {
+		return string(containerID)[:shortContainerIDLength]
+	}
+	return string(containerID)
 }
