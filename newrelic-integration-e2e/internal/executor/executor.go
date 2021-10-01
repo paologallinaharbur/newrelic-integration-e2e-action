@@ -15,7 +15,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const dmTableName = "Metric"
+const (
+	dmTableName         = "Metric"
+	retryNumberAttempts = 10
+	retryAfter          = 30 * time.Second
+)
 
 type Executor struct {
 	agent         agent.Agent
@@ -84,7 +88,7 @@ func (ex *Executor) executeOSCommands(statements []string) error {
 }
 
 func (ex *Executor) executeTests(tests spec.Tests) error {
-	return retrier.Retry(ex.logger, 10, 5*time.Second, func() []error {
+	return retrier.Retry(ex.logger, retryNumberAttempts, retryAfter, func() []error {
 		errors := ex.testEntities(tests.Entities)
 		if len(errors) == 0 {
 			errors = append(
