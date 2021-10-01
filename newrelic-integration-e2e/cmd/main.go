@@ -3,6 +3,11 @@ package main
 import (
 	_ "embed"
 	"flag"
+	"fmt"
+
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
+	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/runtime"
 
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
 	"github.com/sirupsen/logrus"
@@ -53,7 +58,7 @@ func processCliArgs() (string, string, string, string, string, int, logrus.Level
 }
 
 func main() {
-	logrus.Info("running executor")
+	logrus.Info("running e2e")
 
 	licenseKey, specsPath, rootDir, agentDir, apiKey, accountID, logLevel := processCliArgs()
 	s, err := e2e.NewSettings(
@@ -69,9 +74,37 @@ func main() {
 		logrus.Fatalf("error loading settings: %s", err)
 	}
 
-	if err := e2e.Exec(s); err != nil {
+	runner, err := createRunner(s)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	if err := runner.Run(); err != nil {
 		logrus.Fatal(err)
 	}
 
 	logrus.Info("execution completed successfully!")
+}
+
+func createRunner(settings e2e.Settings) (*runtime.Runner, error) {
+	settings.Logger().Debug("validating the spec definition")
+
+	if err := settings.SpecDefinition().Validate(); err != nil {
+		return nil, fmt.Errorf("error validating the spec definition: %s", err)
+	}
+
+	nrClient := newrelic.NewNrClient(settings.ApiKey(), settings.AccountID())
+	entitiesTester := runtime.NewEntitiesTester(nrClient, settings.Logger())
+	metricsTester := runtime.NewMetricsTester(nrClient, settings.Logger(), settings.SpecParentDir())
+	nrqlTester := runtime.NewNRQLTester(nrClient, settings.Logger())
+
+	return runtime.NewRunner(
+		agent.NewAgent(settings),
+		[]runtime.Tester{
+			entitiesTester,
+			metricsTester,
+			nrqlTester,
+		},
+		settings,
+	), nil
 }

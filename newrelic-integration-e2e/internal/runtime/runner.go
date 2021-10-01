@@ -31,6 +31,7 @@ type Runner struct {
 	logger        *logrus.Logger
 	spec          *spec.Definition
 	specParentDir string
+	customTagKey  string
 }
 
 func NewRunner(agent agent.Agent, testers []Tester, settings e2e.Settings) *Runner {
@@ -42,17 +43,18 @@ func NewRunner(agent agent.Agent, testers []Tester, settings e2e.Settings) *Runn
 		logger:        settings.Logger(),
 		spec:          settings.SpecDefinition(),
 		specParentDir: settings.SpecParentDir(),
+		customTagKey:  settings.CustomTagKey(),
 	}
 }
 
 func (r *Runner) Run() error {
 	for _, scenario := range r.spec.Scenarios {
 		scenarioTag := r.generateScenarioTag()
+		r.logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description, scenarioTag)
 
 		if err := r.agent.SetUp(scenario); err != nil {
 			return err
 		}
-		r.logger.Debugf("[scenario]: %s, [Tag]: %s", scenario.Description, scenarioTag)
 
 		if err := r.executeOSCommands(scenario.Before); err != nil {
 			return err
@@ -62,7 +64,7 @@ func (r *Runner) Run() error {
 			return err
 		}
 
-		errAssertions := r.executeTests(scenario.Tests)
+		errAssertions := r.executeTests(scenario.Tests, scenarioTag)
 
 		if err := r.executeOSCommands(scenario.After); err != nil {
 			r.logger.Error(err)
@@ -94,10 +96,10 @@ func (r *Runner) executeOSCommands(statements []string) error {
 	return nil
 }
 
-func (r *Runner) executeTests(tests spec.Tests) error {
+func (r *Runner) executeTests(tests spec.Tests, scenarioTag string) error {
 	for _, tester := range r.testers {
 		err := retrier.Retry(r.logger, retryNumberAttempts, retryAfter, func() []error {
-			return tester.Test(tests, "", "")
+			return tester.Test(tests, r.customTagKey, scenarioTag)
 		})
 		if err != nil {
 			return err
