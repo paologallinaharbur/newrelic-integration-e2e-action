@@ -5,9 +5,6 @@ import (
 	"flag"
 
 	e2e "github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/agent"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/executor"
-	"github.com/newrelic/newrelic-integration-e2e-action/newrelic-integration-e2e/internal/newrelic"
 	"github.com/sirupsen/logrus"
 )
 
@@ -69,24 +66,12 @@ func main() {
 		e2e.SettingsWithAccountID(accountID),
 	)
 	if err != nil {
-		logrus.Fatalf("error loading s: %s", err)
-	}
-	logger := s.Logger()
-
-	logger.Debug("validating the spec definition")
-	if err := s.SpecDefinition().Validate(); err != nil {
-		logger.Fatalf("error validating the spec definition: %s", err)
+		logrus.Fatalf("error loading settings: %s", err)
 	}
 
-	e2eExecutor := executor.NewExecutor(
-		agent.NewAgent(s),
-		newrelic.NewNrClient(s.ApiKey(), s.AccountID()),
-		s,
-	)
-
-	if err := e2eExecutor.Exec(); err != nil {
-		logger.Fatal(err)
+	if err := e2e.Exec(s); err != nil {
+		logrus.Fatal(err)
 	}
 
-	logger.Info("execution completed successfully!")
+	logrus.Info("execution completed successfully!")
 }

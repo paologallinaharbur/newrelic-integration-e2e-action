@@ -8,6 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const customTagKey = "testKey"
+
 var defaultSettingsOptions = settingOptions{
 	logLevel: logrus.InfoLevel,
 }
@@ -77,6 +79,7 @@ type Settings interface {
 	LicenseKey() string
 	ApiKey() string
 	AccountID() int
+	CustomTagKey() string
 }
 
 type settings struct {
@@ -120,6 +123,10 @@ func (s *settings) ApiKey() string {
 
 func (s *settings) AccountID() int {
 	return s.accountID
+}
+
+func (s *settings) CustomTagKey() string {
+	return customTagKey
 }
 
 // New returns a Scheduler
